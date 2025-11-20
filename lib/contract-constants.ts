@@ -2,33 +2,41 @@
  * Songsim Smart Contract Constants
  *
  * Auto-generated from deployment on Sui Testnet
- * Date: Latest deployment - Epoch 923, Transaction: 45HVFV68FumxmYoutcy5bqtdJ7pdtAoVMHY8McMk13TX
+ * Date: November 20, 2025
+ * Transaction: EFmYwACtrQ3xVzsfxsPJQ2ZK7aw3XxRZr494ZHx5FLAw
+ * Version: 2.0.0 (36/36 tests passing + Staking Functions)
  *
  * This deployment includes:
  * - Main songsim module (marketplace logic)
+ * - Staking module (anti-Sybil protection) - NOW EXPOSED
  * - access_policy module (Seal encryption access control)
+ * - migration module (version tracking & upgrades)
+ * - All security features (quality, emergency, disputes, prize pools)
  */
 
 export const NETWORK = "testnet" as const;
 
 export const CONTRACT = {
   PACKAGE_ID:
-    "0x6c6d48de42b8908bd08b110c820517f020954c887b8e02b2c1b1c4018ce4c1bf",
+    "0xe92d9bf5a82568d6c994917c88606eedd97374c978367a233c3fe33955534dea",
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
+  STAKING_MODULE: "staking",
 } as const;
 
 export const OBJECTS = {
   ADMIN_CAP_ID:
-    "0x24b16d11daf8a4c98e54a6abbfac354a43ddbecbea3e6abe5991eeee1876de08",
+    "0x361efdc205a526c6dfaf5ef7313bac1dc1b1f690c6d0c7ac826bcb02a057d429",
   PLATFORM_CONFIG_ID:
-    "0x05ac3d26c32c397a85c02cbadc0785f3bda4cc9ca97be84e06d30e8d8b2ab5f9",
+    "0x80ecfcccd12cfcfccb0436691d3cda735a02fc9d02a4f55bbea75cd8eb703385",
   TASK_REGISTRY_ID:
-    "0xedf112f1c732d5010e45b6b3da4e3b2d63d911a1195aa3f96bbc3f02cf81e518",
+    "0x8d0aaa56bac53294a2c35220bc66dc2159043d67d12a6b31a2605644edb7c82a",
+  MIGRATION_STATE_ID:
+    "0xa6b0753bc01a20116959c36bbce33243faabc2ed1b74f7ac7a0a76d2c2a956c7",
   ACCESS_REGISTRY_ID:
-    "0x79fd9e826cab39eb1d4aeb15a63084c63625ce725c1ea22480a816a61514c03d",
+    "0x703b68cc81fd3e9e450a6f3861b14238014c8d80aebe5b94405828f78fbb2e48",
   UPGRADE_CAP_ID:
-    "0x90409f8e4c8303598a1be19eb384721a283992d0d5d28544466aa4fa435ea718",
+    "0xcf8a2af8ce073e32292d446c4fb356cddea0d66aaf5c112680f4f5a96322282a",
 } as const;
 
 export const PLATFORM_CONFIG = {

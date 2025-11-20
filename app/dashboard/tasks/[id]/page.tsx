@@ -10,6 +10,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTask } from "@/hooks/use-tasks";
 import { useTaskSubmissions } from "@/hooks/use-submissions";
+import { useConsensus } from "@/hooks/use-consensus";
 import {
   Card,
   CardContent,
@@ -91,45 +92,19 @@ export default function TaskDetailPage({
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<ProcessedSubmission | null>(null);
-  const [isFinalizingConsensus, setIsFinalizingConsensus] = useState(false);
   const [error, setError] = useState("");
 
-  const [selectedAccepted, setSelectedAccepted] = useState<Set<string>>(
-    new Set()
-  );
-  const [selectedRejected, setSelectedRejected] = useState<Set<string>>(
-    new Set()
-  );
+  // Use the consensus hook for state management
+  const {
+    selectedAccepted,
+    selectedRejected,
+    toggleAccept,
+    toggleReject,
+    finalizeConsensus,
+    isProcessing: isFinalizingConsensus,
+  } = useConsensus(taskObjectId, task?.taskId || "");
 
-  const handleToggleAccept = (submissionId: string) => {
-    const newAccepted = new Set(selectedAccepted);
-    const newRejected = new Set(selectedRejected);
-
-    if (newAccepted.has(submissionId)) {
-      newAccepted.delete(submissionId);
-    } else {
-      newAccepted.add(submissionId);
-      newRejected.delete(submissionId); // Remove from rejected if was there
-    }
-
-    setSelectedAccepted(newAccepted);
-    setSelectedRejected(newRejected);
-  };
-
-  const handleToggleReject = (submissionId: string) => {
-    const newAccepted = new Set(selectedAccepted);
-    const newRejected = new Set(selectedRejected);
-
-    if (newRejected.has(submissionId)) {
-      newRejected.delete(submissionId);
-    } else {
-      newRejected.add(submissionId);
-      newAccepted.delete(submissionId); // Remove from accepted if was there
-    }
-
-    setSelectedAccepted(newAccepted);
-    setSelectedRejected(newRejected);
-  };
+  // Toggle functions are now provided by useConsensus hook
 
   const handleFinalizeConsensus = async (
     acceptedIds: number[],
@@ -137,47 +112,14 @@ export default function TaskDetailPage({
   ) => {
     if (!task) return;
 
-    setIsFinalizingConsensus(true);
+    // Extract labeler addresses for accepted submissions
+    const acceptedLabelers = submissions
+      .filter((s) => acceptedIds.includes(parseInt(s.submissionId)))
+      .map((s) => s.labeler);
 
-    try {
-      const tx = finalizeConsensusTransaction(
-        taskObjectId,
-        acceptedIds,
-        rejectedIds
-      );
-
-      signAndExecute(
-        { transaction: tx },
-        {
-          onSuccess: (result) => {
-            console.log("Consensus finalized:", result);
-            toast.success("Consensus finalized successfully", {
-              description: `Accepted ${acceptedIds.length}, Rejected ${rejectedIds.length} submissions.`,
-            });
-            setConsensusDialogOpen(false);
-            // Invalidate queries
-            queryClient.invalidateQueries({ queryKey: ["task", taskObjectId] });
-            queryClient.invalidateQueries({ queryKey: ["allTasks"] });
-            queryClient.invalidateQueries({ queryKey: ["myTasks"] });
-            setIsFinalizingConsensus(false);
-          },
-          onError: (error) => {
-            console.error("Finalize consensus error:", error);
-            toast.error("Failed to finalize consensus", {
-              description: error.message || "Please try again.",
-            });
-            setIsFinalizingConsensus(false);
-          },
-        }
-      );
-    } catch (error) {
-      console.error("Finalize consensus error:", error);
-      toast.error("Failed to finalize consensus", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
-      });
-      setIsFinalizingConsensus(false);
-    }
+    // Use the hook's finalizeConsensus method
+    await finalizeConsensus(acceptedIds, acceptedLabelers, rejectedIds);
+    setConsensusDialogOpen(false);
   };
 
   const handleCancelTask = async () => {
@@ -700,16 +642,16 @@ export default function TaskDetailPage({
         isProcessing={isFinalizingConsensus}
         selectedAccepted={selectedAccepted}
         selectedRejected={selectedRejected}
-        onToggleAccept={handleToggleAccept}
-        onToggleReject={handleToggleReject}
+        onToggleAccept={toggleAccept}
+        onToggleReject={toggleReject}
       />
 
       <ReviewSubmissionDialog
         open={reviewDialogOpen}
         onOpenChange={setReviewDialogOpen}
         submission={selectedSubmission}
-        onAccept={handleToggleAccept}
-        onReject={handleToggleReject}
+        onAccept={toggleAccept}
+        onReject={toggleReject}
         currentSelection={
           selectedSubmission
             ? selectedAccepted.has(selectedSubmission.submissionId)

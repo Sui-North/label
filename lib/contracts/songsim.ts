@@ -6,6 +6,14 @@
 import { Transaction } from "@mysten/sui/transactions";
 import { SuiClient } from "@mysten/sui/client";
 
+// Quality Score Conversion Utilities
+// Contract uses 0-1000 scale, UI uses 0-100 for better UX
+export const QUALITY_SCALE_FACTOR = 10;
+export const toContractQualityScore = (uiScore: number): number =>
+  Math.round(uiScore * QUALITY_SCALE_FACTOR);
+export const toUIQualityScore = (contractScore: number): number =>
+  contractScore / QUALITY_SCALE_FACTOR;
+
 // Type definitions for contract data
 interface MoveObject {
   [key: string]: unknown;
@@ -32,10 +40,13 @@ export interface UserProfileData {
 // Contract addresses (update after deployment)
 export const PACKAGE_ID =
   process.env.NEXT_PUBLIC_PACKAGE_ID ||
-  "0xd567fd084674a7c76ea3edb4e184b1423139ae5bcda8c4c1e3a3a9569494b5a9";
+  "0xe92d9bf5a82568d6c994917c88606eedd97374c978367a233c3fe33955534dea";
 export const PLATFORM_CONFIG_ID =
   process.env.NEXT_PUBLIC_PLATFORM_CONFIG_ID || "";
 export const TASK_REGISTRY_ID = process.env.NEXT_PUBLIC_TASK_REGISTRY_ID || "";
+
+// Sui system constants
+const CLOCK_ID = "0x6" as const;
 
 // User types from contract
 export const USER_TYPES = {
@@ -483,24 +494,255 @@ export function formatSuiAmount(mist: bigint | string | number): string {
 }
 
 /**
- * Finalize consensus for a task
- * Marks submissions as accepted or rejected
+ * Finalize consensus and distribute bounty to accepted labelers
+ * @param configId - Platform config object ID
+ * @param taskObjectId - Task object ID
+ * @param acceptedSubmissionIds - Array of accepted submission IDs
+ * @param acceptedLabelers - Array of labeler addresses (must match acceptedSubmissionIds order)
+ * @param rejectedSubmissionIds - Array of rejected submission IDs
+ * @param clockId - Sui Clock object (0x6)
  */
 export function finalizeConsensusTransaction(
+  configId: string,
   taskObjectId: string,
   acceptedSubmissionIds: number[],
-  rejectedSubmissionIds: number[]
-) {
+  acceptedLabelers: string[],
+  rejectedSubmissionIds: number[],
+  clockId: string = "0x6"
+): Transaction {
   const tx = new Transaction();
 
+  // Validate inputs
+  if (acceptedSubmissionIds.length !== acceptedLabelers.length) {
+    throw new Error(
+      "Accepted submission IDs must match labeler addresses count"
+    );
+  }
+
   tx.moveCall({
-    target: `${PACKAGE_ID}::songsim::finalize_consensus`,
+    target: `${PACKAGE_ID}::consensus::finalize_consensus`,
     arguments: [
+      tx.object(configId),
       tx.object(taskObjectId),
       tx.pure.vector("u64", acceptedSubmissionIds),
+      tx.pure.vector("address", acceptedLabelers),
       tx.pure.vector("u64", rejectedSubmissionIds),
+      tx.object(clockId),
     ],
   });
 
   return tx;
 }
+
+/**
+ * Stake SUI for anti-Sybil protection
+ *
+ * ⚠️ TEMPORARILY DISABLED - Contract Update Required
+ *
+ * The staking module exists but isn't exposed in songsim.move.
+ * Contract needs to add:
+ *
+ * public fun create_labeler_stake(config, stake_coin, clock, ctx) {
+ *   let stake = staking::create_stake(ctx.sender(), stake_coin, clock, ctx);
+ *   transfer::public_transfer(stake, ctx.sender());
+ * }
+ *
+ * Then update this to call: `${PACKAGE_ID}::songsim::create_labeler_stake`
+ */
+export function stakeForTaskTransaction(
+  platformConfigId: string,
+  stakeAmount: number
+): Transaction {
+  const tx = new Transaction();
+
+  const [stakeCoin] = tx.splitCoins(tx.gas, [stakeAmount]);
+
+  // TODO: Update after contract deployment
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::create_labeler_stake`,
+    arguments: [tx.object(platformConfigId), stakeCoin, tx.object(CLOCK_ID)],
+  });
+
+  return tx;
+}
+
+/**
+ * Unstake and withdraw SUI after lock period
+ *
+ * ⚠️ TEMPORARILY DISABLED - Contract Update Required
+ *
+ * Contract needs to add:
+ *
+ * public fun withdraw_labeler_stake(stake, clock, ctx) {
+ *   let coins = staking::withdraw_stake(stake, clock, ctx);
+ *   transfer::public_transfer(coins, ctx.sender());
+ * }
+ *
+ * Then update this to call: `${PACKAGE_ID}::songsim::withdraw_labeler_stake`
+ */
+export function unstakeTransaction(stakeObjectId: string): Transaction {
+  const tx = new Transaction();
+
+  // TODO: Update after contract deployment
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::withdraw_labeler_stake`,
+    arguments: [tx.object(stakeObjectId), tx.object(CLOCK_ID)],
+  });
+
+  return tx;
+}
+
+/**
+ * Create a dispute for a submission
+ *
+ * Note: Contract signature is:
+ * public fun create_dispute(registry, task_id, submission_id, reason, clock, ctx)
+ *
+ * Evidence URL and stake amount are not part of current contract implementation.
+ */
+export function createDisputeTransaction(
+  registryId: string,
+  taskId: number,
+  submissionId: number,
+  reason: string
+): Transaction {
+  const tx = new Transaction();
+
+  const reasonBytes = Array.from(new TextEncoder().encode(reason));
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::create_dispute`,
+    arguments: [
+      tx.object(registryId),
+      tx.pure.u64(taskId),
+      tx.pure.u64(submissionId),
+      tx.pure.vector("u8", reasonBytes),
+      tx.object(CLOCK_ID),
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * Vote on a dispute
+ *
+ * Contract function: public fun vote_on_dispute(dispute, vote_for, ctx)
+ */
+export function voteOnDisputeTransaction(
+  disputeObjectId: string,
+  voteFor: boolean
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::vote_on_dispute`,
+    arguments: [tx.object(disputeObjectId), tx.pure.bool(voteFor)],
+  });
+
+  return tx;
+}
+
+/**
+ * Create a prize pool
+ */
+export function createPrizePoolTransaction(
+  registryId: string,
+  taskObjectId: string,
+  prizeAmount: number,
+  entryFee: number,
+  maxParticipants: number,
+  deadline: number
+): Transaction {
+  const tx = new Transaction();
+
+  const [prizeCoin] = tx.splitCoins(tx.gas, [prizeAmount]);
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::prize_pool::create_prize_pool`,
+    arguments: [
+      tx.object(registryId),
+      tx.object(taskObjectId),
+      prizeCoin,
+      tx.pure.u64(entryFee),
+      tx.pure.u64(maxParticipants),
+      tx.pure.u64(deadline),
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * Join a prize pool
+ */
+export function joinPrizePoolTransaction(
+  prizePoolObjectId: string,
+  entryFeeAmount: number
+): Transaction {
+  const tx = new Transaction();
+
+  const [entryFeeCoin] = tx.splitCoins(tx.gas, [entryFeeAmount]);
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::prize_pool::join_prize_pool`,
+    arguments: [tx.object(prizePoolObjectId), entryFeeCoin],
+  });
+
+  return tx;
+}
+
+/**
+ * Report quality score for a submission (Admin/Requester)
+ * @param qualityScore - UI scale (0-100), will be converted to contract scale (0-1000)
+ */
+export function reportQualityTransaction(
+  qualityRegistryId: string,
+  submissionObjectId: string,
+  qualityScore: number // 0-100 UI scale
+): Transaction {
+  const tx = new Transaction();
+
+  // Convert UI scale (0-100) to contract scale (0-1000)
+  const contractScore = toContractQualityScore(qualityScore);
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::quality::record_quality_score`,
+    arguments: [
+      tx.object(qualityRegistryId),
+      tx.object(submissionObjectId),
+      tx.pure.u64(contractScore),
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * Pause or unpause platform (Admin only - requires AdminCap)
+ * @param paused - true to pause, false to unpause
+ */
+export function setPlatformPausedTransaction(
+  adminCapId: string,
+  platformConfigId: string,
+  paused: boolean
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::set_platform_paused`,
+    arguments: [
+      tx.object(adminCapId),
+      tx.object(platformConfigId),
+      tx.pure.bool(paused),
+    ],
+  });
+
+  return tx;
+}
+
+// Note: Staking functions removed - contract doesn't expose them yet
+// TODO: Add back after contract update with create_labeler_stake() and withdraw_labeler_stake()
+
+// Note: respondToDisputeTransaction removed - not implemented in contract
+// Disputes can be voted on using vote_on_dispute()

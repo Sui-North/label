@@ -21,6 +21,8 @@ import {
   BarChart3,
   Users,
   UserCircle,
+  Shield,
+  Star,
 } from "lucide-react";
 
 type UserRole = "requester" | "labeler" | "both";
@@ -44,6 +46,18 @@ const NAV_ITEMS: NavItem[] = [
     href: "/dashboard/profile",
     icon: <UserCircle className="h-5 w-5" />,
     roles: ["requester", "labeler", "both"],
+  },
+  {
+    title: "Staking",
+    href: "/dashboard/staking",
+    icon: <Shield className="h-5 w-5" />,
+    roles: ["labeler", "both"],
+  },
+  {
+    title: "Quality",
+    href: "/dashboard/quality",
+    icon: <Star className="h-5 w-5" />,
+    roles: ["labeler", "both"],
   },
   {
     title: "My Tasks",

@@ -44,9 +44,9 @@ export default function TasksPage() {
           .includes(searchQuery.toLowerCase());
         const matchesStatus =
           statusFilter === "all" ||
-          (statusFilter === "open" && task.status === "0") ||
-          (statusFilter === "completed" && task.status === "1") ||
-          (statusFilter === "cancelled" && task.status === "2");
+          (statusFilter === "open" && (task.status === "0" || task.status === "1")) || // Open or In Progress
+          (statusFilter === "completed" && task.status === "2") ||
+          (statusFilter === "cancelled" && task.status === "3");
         return matchesSearch && matchesStatus;
       })
       .sort((a, b) => {
@@ -66,11 +66,13 @@ export default function TasksPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "0":
-        return "bg-green-500/10 text-green-600 dark:text-green-400";
+        return "bg-green-500/10 text-green-600 dark:text-green-400"; // Open
       case "1":
-        return "bg-gray-500/10 text-gray-600 dark:text-gray-400";
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400"; // In Progress
       case "2":
-        return "bg-red-500/10 text-red-600 dark:text-red-400";
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400"; // Completed
+      case "3":
+        return "bg-red-500/10 text-red-600 dark:text-red-400"; // Cancelled
       default:
         return "";
     }
@@ -79,10 +81,12 @@ export default function TasksPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "0":
-        return "Active";
+        return "Open";
       case "1":
-        return "Completed";
+        return "In Progress";
       case "2":
+        return "Completed";
+      case "3":
         return "Cancelled";
       default:
         return "Unknown";

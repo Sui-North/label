@@ -93,7 +93,7 @@ export default function MySubmissionsPage() {
     submission: (typeof submissions)[0];
   }) => {
     // Find the task for this submission by matching task_id (numeric ID)
-    const task = allTasks.find((t) => t.taskId === submission.taskObjectId);
+    const task = allTasks.find((t) => t.taskId === submission.taskId);
 
     return (
       <Card>
@@ -398,7 +398,9 @@ export default function MySubmissionsPage() {
                         ? "In Progress"
                         : selectedTask.status === "2"
                         ? "Completed"
-                        : "Cancelled"}
+                        : selectedTask.status === "3"
+                        ? "Cancelled"
+                        : "Unknown"}
                     </p>
                   </div>
                 </div>

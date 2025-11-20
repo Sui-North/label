@@ -48,28 +48,35 @@ export default function MyTasksPage() {
   const account = useCurrentAccount();
   const { data: tasks = [], isLoading, error } = useMyTasks();
 
-  // Group tasks by status
-  const activeTasks = tasks.filter((t) => t.status === "0"); // Active
-  const completedTasks = tasks.filter((t) => t.status === "1"); // Completed
-  const cancelledTasks = tasks.filter((t) => t.status === "2"); // Cancelled
+  // Group tasks by status (aligned with contract constants)
+  const activeTasks = tasks.filter((t) => t.status === "0" || t.status === "1"); // Open or In Progress
+  const completedTasks = tasks.filter((t) => t.status === "2"); // Completed
+  const cancelledTasks = tasks.filter((t) => t.status === "3"); // Cancelled
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "0": // Active
+      case "0": // Open/Active
         return (
           <Badge className="bg-green-500/10 text-green-600 dark:text-green-400">
             <Clock className="h-3 w-3 mr-1" />
-            Active
+            Open
           </Badge>
         );
-      case "1": // Completed
+      case "1": // In Progress
         return (
           <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400">
+            <Users className="h-3 w-3 mr-1" />
+            In Progress
+          </Badge>
+        );
+      case "2": // Completed
+        return (
+          <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400">
             <CheckCircle className="h-3 w-3 mr-1" />
             Completed
           </Badge>
         );
-      case "2": // Cancelled
+      case "3": // Cancelled
         return (
           <Badge className="bg-red-500/10 text-red-600 dark:text-red-400">
             <XCircle className="h-3 w-3 mr-1" />
@@ -93,7 +100,7 @@ export default function MyTasksPage() {
 
       setIsCancelling(true);
       try {
-        const tx = cancelTaskTransaction(task.objectId, parseInt(task.bounty));
+        const tx = cancelTaskTransaction(task.objectId);
 
         signAndExecute(
           {

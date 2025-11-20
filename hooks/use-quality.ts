@@ -48,16 +48,17 @@ export function useQuality() {
         }
 
         const fields = (registry.data.content as any).fields;
-        const reputationTableId = fields.reputation_addresses?.fields?.id?.id;
+        const reputationsTableId = fields.reputations?.fields?.id?.id;
 
-        if (!reputationTableId) {
+        if (!reputationsTableId) {
+          console.log("No reputations table found");
           return null;
         }
 
         // Query dynamic field for user's reputation
         try {
           const repField = await suiClient.getDynamicFieldObject({
-            parentId: reputationTableId,
+            parentId: reputationsTableId,
             name: {
               type: "address",
               value: account.address
@@ -82,12 +83,18 @@ export function useQuality() {
 
           const repFields = (repObject.data.content as any).fields;
 
+          // Contract fields: reputation_score (0-1000), total_completed, total_accepted, total_rejected
+          const reputationScore = toUIQualityScore(Number(repFields.reputation_score || 0));
+          const totalCompleted = Number(repFields.total_completed || 0);
+          const totalAccepted = Number(repFields.total_accepted || 0);
+          const totalRejected = Number(repFields.total_rejected || 0);
+
           return {
-            reputationScore: toUIQualityScore(Number(repFields.score || 0)),
-            averageScore: toUIQualityScore(Number(repFields.score || 0)), // Same as reputation
-            totalSubmissions: Number(repFields.total_tasks || 0),
-            acceptedCount: Number(repFields.accepted_tasks || 0),
-            rejectedCount: Number(repFields.rejected_tasks || 0),
+            reputationScore,
+            averageScore: reputationScore, // Same as reputation for backward compatibility
+            totalSubmissions: totalCompleted,
+            acceptedCount: totalAccepted,
+            rejectedCount: totalRejected,
           };
         } catch (error) {
           // User might not have reputation yet

@@ -234,12 +234,16 @@ export default function TaskDetailPage() {
               ? "default"
               : task.status === "1"
               ? "secondary"
+              : task.status === "2"
+              ? "outline"
               : "destructive"
           }
         >
           {task.status === "0"
-            ? "Active"
+            ? "Open"
             : task.status === "1"
+            ? "In Progress"
+            : task.status === "2"
             ? "Completed"
             : "Cancelled"}
         </Badge>

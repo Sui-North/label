@@ -34,7 +34,7 @@ export default function HomePage() {
 
   // Calculate statistics
   const totalTasks = tasks?.length || 0;
-  const activeTasks = tasks?.filter((task) => task.status === "0").length || 0;
+  const activeTasks = tasks?.filter((task) => task.status === "0" || task.status === "1").length || 0; // Open or In Progress
   const totalBounty =
     tasks?.reduce((sum, task) => sum + (Number(task.bounty) || 0), 0) || 0;
   const totalBountySUI = (totalBounty / 1_000_000_000).toFixed(2);

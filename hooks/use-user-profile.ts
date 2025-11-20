@@ -87,7 +87,58 @@ export function useUserProfile() {
         TASK_REGISTRY_ID
       );
 
-      return processProfileData(profile);
+      if (!profile) return null;
+
+      // Fetch reputation from registry
+      let reputationScore = 500; // Default for new users
+      try {
+        const registryObject = await client.getObject({
+          id: TASK_REGISTRY_ID,
+          options: { showContent: true },
+        });
+
+        if (registryObject.data?.content && "fields" in registryObject.data.content) {
+          const fields = registryObject.data.content.fields as any;
+          const reputationsTableId = fields.reputations?.fields?.id?.id;
+
+          if (reputationsTableId) {
+            try {
+              const dynamicFieldObject = await client.getDynamicFieldObject({
+                parentId: reputationsTableId,
+                name: {
+                  type: "address",
+                  value: account.address,
+                },
+              });
+
+              if (dynamicFieldObject.data?.content && "fields" in dynamicFieldObject.data.content) {
+                const fieldContent = dynamicFieldObject.data.content.fields as any;
+                const reputationObjectId = fieldContent.value as string;
+
+                const reputationObject = await client.getObject({
+                  id: reputationObjectId,
+                  options: { showContent: true },
+                });
+
+                if (reputationObject.data?.content && "fields" in reputationObject.data.content) {
+                  const repFields = reputationObject.data.content.fields as any;
+                  reputationScore = Number(repFields.reputation_score || 500);
+                }
+              }
+            } catch (error) {
+              console.log("No reputation found for user, using default");
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching reputation:", error);
+      }
+
+      const processed = processProfileData(profile);
+      if (processed) {
+        processed.reputationScore = reputationScore;
+      }
+      return processed;
     },
     enabled: !!account && !!TASK_REGISTRY_ID,
     staleTime: 5 * 60 * 1000, // 5 minutes

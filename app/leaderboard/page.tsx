@@ -68,8 +68,8 @@ export default function LeaderboardPage() {
       if (submission.status === "1") {
         // Accepted
         existing.acceptedSubmissions++;
-        // Find corresponding task to get bounty
-        const task = tasks.find((t) => t.objectId === submission.taskObjectId);
+        // Find corresponding task to get bounty - match by taskId
+        const task = tasks.find((t) => t.taskId === submission.taskId);
         if (task) {
           existing.totalEarned +=
             BigInt(task.bounty) / BigInt(task.requiredLabelers);
@@ -129,15 +129,15 @@ export default function LeaderboardPage() {
       };
 
       existing.totalTasks++;
-      if (task.status === "1") {
-        // Completed
+      if (task.status === "2") {
+        // Completed (status 2, not 1)
         existing.completedTasks++;
       }
       existing.totalSpent += BigInt(task.bounty);
 
-      // Count submissions for this task
+      // Count submissions for this task - match by taskId
       const taskSubmissions = submissions.filter(
-        (s) => s.taskObjectId === task.objectId
+        (s) => s.taskId === task.taskId
       );
       existing.totalSubmissions += taskSubmissions.length;
 

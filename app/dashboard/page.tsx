@@ -71,15 +71,15 @@ function DashboardContent() {
     if (!tasks || !account?.address) return null;
 
     const myTasks = tasks.filter((t) => t.requester === account.address);
-    const activeTasks = myTasks.filter((t) => t.status === "0");
-    const completedTasks = myTasks.filter((t) => t.status === "1");
+    const activeTasks = myTasks.filter((t) => t.status === "0" || t.status === "1"); // Open or In Progress
+    const completedTasks = myTasks.filter((t) => t.status === "2");
     const totalSpent = myTasks.reduce((sum, t) => sum + Number(t.bounty), 0);
     const totalSpentSUI = (totalSpent / 1_000_000_000).toFixed(2);
 
     // Calculate average quality from submissions
     const myTaskIds = new Set(myTasks.map((t) => t.objectId));
     const mySubmissions =
-      submissions?.filter((s) => myTaskIds.has(s.taskObjectId)) || [];
+      submissions?.filter((s) => myTaskIds.has(s.objectId)) || [];
     const acceptedSubmissions = mySubmissions.filter((s) => s.status === "1");
     const avgQuality =
       mySubmissions.length > 0
@@ -109,7 +109,7 @@ function DashboardContent() {
     // Calculate total earned from accepted submissions
     let totalEarned = BigInt(0);
     acceptedSubmissions.forEach((submission) => {
-      const task = tasks.find((t) => t.objectId === submission.taskObjectId);
+      const task = tasks.find((t) => t.objectId === submission.objectId);
       if (task) {
         totalEarned += BigInt(task.bounty) / BigInt(task.requiredLabelers);
       }
@@ -739,7 +739,7 @@ function DashboardContent() {
                   {labelerStats.recentSubmissions.length > 0 ? (
                     labelerStats.recentSubmissions.map((submission) => {
                       const task = tasks?.find(
-                        (t) => t.objectId === submission.taskObjectId
+                        (t) => t.objectId === submission.objectId
                       );
                       return (
                         <div
@@ -780,7 +780,7 @@ function DashboardContent() {
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/tasks/${submission.taskObjectId}`}>
+                            <Link href={`/tasks/${submission.objectId}`}>
                               <ArrowUpRight className="h-4 w-4" />
                             </Link>
                           </Button>

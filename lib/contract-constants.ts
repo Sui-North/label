@@ -2,15 +2,16 @@
  * Songsim Smart Contract Constants
  *
  * Auto-generated from deployment on Sui Testnet
- * Date: November 20, 2025
- * Transaction: EFmYwACtrQ3xVzsfxsPJQ2ZK7aw3XxRZr494ZHx5FLAw
- * Version: 2.0.0 (36/36 tests passing + Staking Functions)
+ * Upgraded: November 20, 2025 (v2.0.0 - Deadline Extension Feature)
+ * Transaction: GbCpF6aBgqtmDLnAF8yBPyyoFV4tXbUXgv4h4jnMrpc7
+ * Version: 2.0.0 (36/36 tests passing + Deadline Extension)
  *
  * This deployment includes:
  * - Main songsim module (marketplace logic)
  * - Staking module (anti-Sybil protection) - NOW EXPOSED
  * - access_policy module (Seal encryption access control)
  * - migration module (version tracking & upgrades)
+ * - NEW: extend_deadline function (requesters can extend task deadlines)
  * - All security features (quality, emergency, disputes, prize pools)
  */
 
@@ -18,7 +19,7 @@ export const NETWORK = "testnet" as const;
 
 export const CONTRACT = {
   PACKAGE_ID:
-    "0xe92d9bf5a82568d6c994917c88606eedd97374c978367a233c3fe33955534dea",
+    "0x437f4dac58b0dd5daeaecc66d4cb3571ae6e379cfd6f3018447f0b8bbffcc19d",
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",

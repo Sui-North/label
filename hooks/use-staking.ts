@@ -36,12 +36,10 @@ export function useStaking() {
       if (!account?.address) return [];
       
       try {
-        // Query LabelerStake objects owned by current user
+        // Query all owned objects and filter for LabelerStake
+        // This handles stakes from both old and new package versions after upgrade
         const result = await suiClient.getOwnedObjects({
           owner: account.address,
-          filter: {
-            StructType: `${PACKAGE_ID}::staking::LabelerStake`
-          },
           options: {
             showContent: true,
             showType: true,
@@ -50,7 +48,12 @@ export function useStaking() {
 
         const now = Date.now();
         const stakesData: StakeInfo[] = result.data
-          .filter(obj => obj.data?.content && 'fields' in obj.data.content)
+          .filter(obj => {
+            // Filter for LabelerStake objects (from any package version)
+            if (!obj.data?.content || !('fields' in obj.data.content)) return false;
+            const type = obj.data.type;
+            return type?.includes('::staking::LabelerStake');
+          })
           .map(obj => {
             const fields = (obj.data?.content as any).fields;
             const lockedUntil = Number(fields.locked_until);

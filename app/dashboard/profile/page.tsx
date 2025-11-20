@@ -7,6 +7,8 @@ import {
 } from "@mysten/dapp-kit";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { useReputation } from "@/hooks/use-reputation";
+import { ReputationCard, BadgeCard, NextBadgeProgress } from "@/components/reputation-badges";
 import {
   Card,
   CardContent,
@@ -85,6 +87,7 @@ interface EditFormData {
 export default function ProfilePage() {
   const account = useCurrentAccount();
   const { data: profile, isLoading } = useUserProfile();
+  const { reputation, isLoading: isLoadingReputation, badgeDetails, nextBadge, acceptanceRate, BADGE_REQUIREMENTS } = useReputation(account?.address);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const queryClient = useQueryClient();
 
@@ -334,6 +337,7 @@ export default function ProfilePage() {
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsTrigger value="reputation">Reputation</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
@@ -603,6 +607,88 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="reputation" className="space-y-6">
+          {isLoadingReputation ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : reputation ? (
+            <>
+              <div className="grid gap-6 md:grid-cols-2">
+                <ReputationCard
+                  reputationScore={reputation.reputation_score}
+                  totalCompleted={reputation.total_completed}
+                  totalAccepted={reputation.total_accepted}
+                  totalRejected={reputation.total_rejected}
+                  acceptanceRate={acceptanceRate}
+                />
+                
+                {nextBadge && (
+                  <NextBadgeProgress
+                    name={nextBadge.name}
+                    progress={nextBadge.progress}
+                    target={nextBadge.target}
+                    requirement={nextBadge.requirement}
+                  />
+                )}
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Badges & Achievements</CardTitle>
+                  <CardDescription>
+                    Unlock badges by completing tasks and maintaining quality
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <BadgeCard 
+                      badgeId={1} 
+                      name="Novice" 
+                      requirement={BADGE_REQUIREMENTS[1]}
+                      earned={badgeDetails.some(b => b.id === 1)}
+                    />
+                    <BadgeCard 
+                      badgeId={2} 
+                      name="Intermediate" 
+                      requirement={BADGE_REQUIREMENTS[2]}
+                      earned={badgeDetails.some(b => b.id === 2)}
+                    />
+                    <BadgeCard 
+                      badgeId={3} 
+                      name="Expert" 
+                      requirement={BADGE_REQUIREMENTS[3]}
+                      earned={badgeDetails.some(b => b.id === 3)}
+                    />
+                    <BadgeCard 
+                      badgeId={4} 
+                      name="Master" 
+                      requirement={BADGE_REQUIREMENTS[4]}
+                      earned={badgeDetails.some(b => b.id === 4)}
+                    />
+                    <BadgeCard 
+                      badgeId={5} 
+                      name="Consistent" 
+                      requirement={BADGE_REQUIREMENTS[5]}
+                      earned={badgeDetails.some(b => b.id === 5)}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Award className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No Reputation Data</h3>
+                <p className="text-muted-foreground">
+                  Complete tasks to start building your reputation
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="activity">

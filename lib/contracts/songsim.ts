@@ -5,6 +5,7 @@
 
 import { Transaction } from "@mysten/sui/transactions";
 import { SuiClient } from "@mysten/sui/client";
+import { bcs } from "@mysten/sui/bcs";
 
 // Quality Score Conversion Utilities
 // Contract uses 0-1000 scale, UI uses 0-100 for better UX
@@ -726,25 +727,31 @@ export function voteOnDisputeTransaction(
  */
 export function createPrizePoolTransaction(
   registryId: string,
-  taskObjectId: string,
+  name: string,
+  description: string,
   prizeAmount: number,
-  entryFee: number,
-  maxParticipants: number,
-  deadline: number
+  startTime: number,
+  endTime: number,
+  minSubmissions: number,
+  winnersCount: number
 ): Transaction {
   const tx = new Transaction();
 
   const [prizeCoin] = tx.splitCoins(tx.gas, [prizeAmount]);
+  const nameBytes = Array.from(new TextEncoder().encode(name));
+  const descBytes = Array.from(new TextEncoder().encode(description));
 
   tx.moveCall({
-    target: `${PACKAGE_ID}::prize_pool::create_prize_pool`,
+    target: `${PACKAGE_ID}::songsim::create_prize_pool`,
     arguments: [
       tx.object(registryId),
-      tx.object(taskObjectId),
+      tx.pure(bcs.vector(bcs.u8()).serialize(nameBytes)),
+      tx.pure(bcs.vector(bcs.u8()).serialize(descBytes)),
       prizeCoin,
-      tx.pure.u64(entryFee),
-      tx.pure.u64(maxParticipants),
-      tx.pure.u64(deadline),
+      tx.pure.u64(startTime),
+      tx.pure.u64(endTime),
+      tx.pure.u64(minSubmissions),
+      tx.pure.u64(winnersCount),
     ],
   });
 
@@ -755,19 +762,102 @@ export function createPrizePoolTransaction(
  * Join a prize pool
  */
 export function joinPrizePoolTransaction(
-  prizePoolObjectId: string,
-  entryFeeAmount: number
+  prizePoolObjectId: string
 ): Transaction {
   const tx = new Transaction();
 
-  const [entryFeeCoin] = tx.splitCoins(tx.gas, [entryFeeAmount]);
-
   tx.moveCall({
-    target: `${PACKAGE_ID}::prize_pool::join_prize_pool`,
-    arguments: [tx.object(prizePoolObjectId), entryFeeCoin],
+    target: `${PACKAGE_ID}::songsim::join_prize_pool`,
+    arguments: [tx.object(prizePoolObjectId), tx.object(CLOCK_ID)],
   });
 
   return tx;
+}
+
+/**
+ * Get all prize pools from registry
+ */
+export async function getAllPrizePools(client: SuiClient, registryId: string) {
+  try {
+    const registry = await client.getObject({
+      id: registryId,
+      options: {
+        showContent: true,
+      },
+    });
+
+    if (
+      !registry.data?.content ||
+      registry.data.content.dataType !== "moveObject"
+    ) {
+      throw new Error("Invalid registry object");
+    }
+
+    const fields = registry.data.content.fields as MoveObject;
+    const poolsTable = fields.prize_pools as TableField;
+    const poolsTableId = poolsTable.fields.id.id;
+
+    const dynamicFields = await client.getDynamicFields({
+      parentId: poolsTableId,
+    });
+
+    const pools: any[] = [];
+
+    for (const field of dynamicFields.data) {
+      try {
+        const dynamicFieldObject = await client.getDynamicFieldObject({
+          parentId: poolsTableId,
+          name: {
+            type: "u64",
+            value: field.name.value as string,
+          },
+        });
+
+        if (
+          dynamicFieldObject.data?.content &&
+          dynamicFieldObject.data.content.dataType === "moveObject"
+        ) {
+          const fieldContent = dynamicFieldObject.data.content.fields as MoveObject;
+          const poolObjectId = fieldContent.value as string;
+
+          const poolObject = await client.getObject({
+            id: poolObjectId,
+            options: {
+              showContent: true,
+            },
+          });
+
+          if (
+            poolObject.data?.content &&
+            poolObject.data.content.dataType === "moveObject"
+          ) {
+            const poolFields = poolObject.data.content.fields as MoveObject;
+            
+            pools.push({
+              objectId: poolObject.data.objectId,
+              pool_id: poolFields.pool_id,
+              name: poolFields.name as string,
+              description: poolFields.description as string,
+              total_amount: poolFields.total_amount,
+              start_time: poolFields.start_time,
+              end_time: poolFields.end_time,
+              min_submissions: poolFields.min_submissions,
+              winners_count: poolFields.winners_count,
+              status: poolFields.status,
+              participant_count: (poolFields.participants as any).length || 0,
+            });
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching pool ${field.name.value}:`, error);
+      }
+    }
+
+    return pools;
+  } catch (error) {
+    console.error("Error fetching prize pools:", error);
+    return [];
+  }
 }
 
 /**

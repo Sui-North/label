@@ -27,6 +27,7 @@ import {
 
 interface Submission {
   submissionId: string;
+  objectId: string; // Add objectId for unique identification
   labeler: string;
   status: string;
   resultUrl: string;
@@ -41,7 +42,7 @@ interface ConsensusDialogProps {
   taskId: string;
   bountyAmount: string;
   requiredLabelers: number;
-  onFinalize: (acceptedIds: number[], rejectedIds: number[]) => Promise<void>;
+  onFinalize: (acceptedObjectIds: string[], rejectedObjectIds: string[]) => Promise<void>;
   isProcessing: boolean;
   selectedAccepted: Set<string>;
   selectedRejected: Set<string>;
@@ -64,10 +65,10 @@ export function ConsensusDialog({
   onToggleReject,
 }: ConsensusDialogProps) {
   const handleFinalize = async () => {
-    const acceptedIds = Array.from(selectedAccepted).map((id) => parseInt(id));
-    const rejectedIds = Array.from(selectedRejected).map((id) => parseInt(id));
+    const acceptedObjectIds = Array.from(selectedAccepted);
+    const rejectedObjectIds = Array.from(selectedRejected);
 
-    await onFinalize(acceptedIds, rejectedIds);
+    await onFinalize(acceptedObjectIds, rejectedObjectIds);
   };
 
   const pendingSubmissions = submissions.filter((s) => s.status === "0");
@@ -93,7 +94,7 @@ export function ConsensusDialog({
             <p className="text-2xl font-bold text-blue-600">
               {pendingSubmissions.length}
             </p>
-            <p className="text-xs text-muted-foreground">Pending Review</p>
+            <p className="text-xs text-muted-foreground">Total Submissions</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-green-600">
@@ -108,6 +109,28 @@ export function ConsensusDialog({
             <p className="text-xs text-muted-foreground">Rejecting</p>
           </div>
         </div>
+
+        {/* Review Progress Alert */}
+        {!allReviewed && pendingSubmissions.length > 0 && (
+          <Alert className="border-yellow-500 bg-yellow-500/10">
+            <AlertCircle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+              <strong>Action Required:</strong> You must review ALL {pendingSubmissions.length} submissions before finalizing.
+              <div className="mt-2 font-medium">
+                Progress: {selectedAccepted.size + selectedRejected.size} / {pendingSubmissions.length} reviewed
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {allReviewed && selectedAccepted.size === 0 && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You must accept at least one submission to finalize consensus.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Separator />
 
@@ -145,12 +168,12 @@ export function ConsensusDialog({
             </Alert>
           ) : (
             pendingSubmissions.map((submission) => {
-              const isAccepted = selectedAccepted.has(submission.submissionId);
-              const isRejected = selectedRejected.has(submission.submissionId);
+              const isAccepted = selectedAccepted.has(submission.objectId);
+              const isRejected = selectedRejected.has(submission.objectId);
 
               return (
                 <div
-                  key={submission.submissionId}
+                  key={submission.objectId}
                   className={`border rounded-lg p-4 ${
                     isAccepted
                       ? "border-green-500 bg-green-500/5"
@@ -200,7 +223,7 @@ export function ConsensusDialog({
                     <Button
                       size="sm"
                       variant={isAccepted ? "default" : "outline"}
-                      onClick={() => onToggleAccept(submission.submissionId)}
+                      onClick={() => onToggleAccept(submission.objectId)}
                       className={
                         isAccepted ? "bg-green-600 hover:bg-green-700" : ""
                       }
@@ -211,7 +234,7 @@ export function ConsensusDialog({
                     <Button
                       size="sm"
                       variant={isRejected ? "destructive" : "outline"}
-                      onClick={() => onToggleReject(submission.submissionId)}
+                      onClick={() => onToggleReject(submission.objectId)}
                     >
                       <XCircle className="h-4 w-4 mr-1" />
                       Reject
@@ -229,8 +252,17 @@ export function ConsensusDialog({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Please review all {pendingSubmissions.length} submissions
-                  before finalizing consensus.
+                  <strong>Cannot finalize:</strong> All {pendingSubmissions.length} submissions must be reviewed (accepted or rejected).
+                  Currently reviewed: {selectedAccepted.size + selectedRejected.size} / {pendingSubmissions.length}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {allReviewed && selectedAccepted.size === 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Cannot finalize:</strong> At least one submission must be accepted.
                 </AlertDescription>
               </Alert>
             )}
@@ -245,7 +277,7 @@ export function ConsensusDialog({
               </Button>
               <Button
                 onClick={handleFinalize}
-                disabled={!allReviewed || isProcessing}
+                disabled={!allReviewed || selectedAccepted.size === 0 || isProcessing}
               >
                 {isProcessing ? (
                   <>

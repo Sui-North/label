@@ -188,7 +188,7 @@ export function ReviewSubmissionDialog({
                 variant={
                   currentSelection === "accepted" ? "default" : "outline"
                 }
-                onClick={() => onAccept(submission.submissionId)}
+                onClick={() => onAccept(submission.objectId)}
                 className={
                   currentSelection === "accepted"
                     ? "bg-green-600 hover:bg-green-700"
@@ -202,7 +202,7 @@ export function ReviewSubmissionDialog({
                 variant={
                   currentSelection === "rejected" ? "destructive" : "outline"
                 }
-                onClick={() => onReject(submission.submissionId)}
+                onClick={() => onReject(submission.objectId)}
               >
                 <XCircle className="h-4 w-4 mr-2" />
                 {currentSelection === "rejected" ? "Rejected" : "Reject"}

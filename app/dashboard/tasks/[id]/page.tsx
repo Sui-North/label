@@ -122,14 +122,23 @@ export default function TaskDetailPage({
   // Toggle functions are now provided by useConsensus hook
 
   const handleFinalizeConsensus = async (
-    acceptedIds: number[],
-    rejectedIds: number[]
+    acceptedObjectIds: string[],
+    rejectedObjectIds: string[]
   ) => {
     if (!task) return;
 
+    // Map objectIds back to submissionIds for the contract
+    const acceptedIds = submissions
+      .filter((s) => acceptedObjectIds.includes(s.objectId))
+      .map((s) => parseInt(s.submissionId));
+    
+    const rejectedIds = submissions
+      .filter((s) => rejectedObjectIds.includes(s.objectId))
+      .map((s) => parseInt(s.submissionId));
+
     // Extract labeler addresses for accepted submissions
     const acceptedLabelers = submissions
-      .filter((s) => acceptedIds.includes(parseInt(s.submissionId)))
+      .filter((s) => acceptedObjectIds.includes(s.objectId))
       .map((s) => s.labeler);
 
     // Use the hook's finalizeConsensus method
@@ -470,10 +479,21 @@ export default function TaskDetailPage({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {submissions.map((submission) => (
+                  {submissions.map((submission) => {
+                    const isSelectedAccepted = selectedAccepted.has(submission.objectId);
+                    const isSelectedRejected = selectedRejected.has(submission.objectId);
+                    const hasReviewDecision = isSelectedAccepted || isSelectedRejected;
+
+                    return (
                     <div
-                      key={submission.submissionId}
-                      className="border rounded-lg p-4"
+                      key={submission.objectId}
+                      className={`border rounded-lg p-4 ${
+                        isSelectedAccepted
+                          ? "border-green-500 bg-green-500/5"
+                          : isSelectedRejected
+                          ? "border-red-500 bg-red-500/5"
+                          : ""
+                      }`}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
@@ -486,7 +506,17 @@ export default function TaskDetailPage({
                             showAddress={false}
                           />
                         </div>
-                        {getSubmissionStatusBadge(submission.status)}
+                        <div className="flex items-center gap-2">
+                          {getSubmissionStatusBadge(submission.status)}
+                          {hasReviewDecision && submission.status === "0" && (
+                            <Badge 
+                              variant={isSelectedAccepted ? "default" : "destructive"}
+                              className={isSelectedAccepted ? "bg-green-600" : ""}
+                            >
+                              {isSelectedAccepted ? "Will Accept" : "Will Reject"}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
@@ -503,11 +533,11 @@ export default function TaskDetailPage({
                             setReviewDialogOpen(true);
                           }}
                         >
-                          Review
+                          {hasReviewDecision ? "Change Review" : "Review"}
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </CardContent>
@@ -584,6 +614,31 @@ export default function TaskDetailPage({
                     <p className="text-xs text-muted-foreground">Rejected</p>
                   </div>
                 </div>
+                
+                {/* Review Progress for Pending Submissions */}
+                {pendingSubmissions.length > 0 && (
+                  <div className="mt-3 p-2 bg-muted rounded-md">
+                    <p className="text-xs font-medium mb-1">Review Progress</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-background rounded-full h-2 overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-600 transition-all"
+                          style={{ 
+                            width: `${((selectedAccepted.size + selectedRejected.size) / pendingSubmissions.length) * 100}%` 
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium">
+                        {selectedAccepted.size + selectedRejected.size}/{pendingSubmissions.length}
+                      </span>
+                    </div>
+                    {selectedAccepted.size + selectedRejected.size < pendingSubmissions.length && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Review all submissions to finalize
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <Separator />
@@ -813,9 +868,9 @@ export default function TaskDetailPage({
         onReject={toggleReject}
         currentSelection={
           selectedSubmission
-            ? selectedAccepted.has(selectedSubmission.submissionId)
+            ? selectedAccepted.has(selectedSubmission.objectId)
               ? "accepted"
-              : selectedRejected.has(selectedSubmission.submissionId)
+              : selectedRejected.has(selectedSubmission.objectId)
               ? "rejected"
               : null
             : null

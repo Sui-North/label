@@ -8,7 +8,8 @@ import { TASK_REGISTRY_ID, decodeVectorU8 } from "@/lib/contracts/songsim";
 
 export interface ProcessedSubmission {
   submissionId: string;
-  taskObjectId: string;
+  objectId: string; // Sui object ID as unique identifier
+  taskId: string; // Numeric task ID from contract
   labeler: string;
   resultUrl: string;
   resultFilename: string;
@@ -21,14 +22,15 @@ export interface ProcessedSubmission {
  * Process raw submission data from blockchain
  */
 function processSubmissionData(submission: any): ProcessedSubmission {
-  // Sui RPC already decodes Move String types to JavaScript strings
-  const resultUrl = submission.result_url || "";
-  const resultFilename = submission.result_filename || "result.csv";
-  const resultContentType = submission.result_content_type || "application/octet-stream";
+  // Decode Move String (vector<u8>) fields
+  const resultUrl = decodeVectorU8(submission.result_url);
+  const resultFilename = decodeVectorU8(submission.result_filename);
+  const resultContentType = decodeVectorU8(submission.result_content_type);
 
   return {
     submissionId: submission.submission_id?.toString() || "0",
-    taskObjectId: submission.task_id?.toString() || "0",
+    objectId: submission.object_id || "", // Use object ID as unique identifier
+    taskId: submission.task_id?.toString() || "0", // Numeric task ID
     labeler: submission.labeler,
     resultUrl,
     resultFilename,
@@ -82,12 +84,15 @@ export function useAllSubmissions() {
           const submissions = await Promise.all(
             submissionsTable.data.map(async (field) => {
               try {
+                // The field.name.value is the ACTUAL submission_id from registry
+                const registrySubmissionId = field.name.value as string;
+                
                 // Get the dynamic field object which contains the submission address
                 const dynamicFieldObject = await client.getDynamicFieldObject({
                   parentId: submissionsTableId,
                   name: {
                     type: "u64",
-                    value: field.name.value as string,
+                    value: registrySubmissionId,
                   },
                 });
 
@@ -115,7 +120,10 @@ export function useAllSubmissions() {
                     const extractStringBytes = (field: any) => field?.bytes || [];
                     
                     return {
-                      submission_id: submissionFields.submission_id,
+                      // CRITICAL: Use registry key as submission_id, not the Submission object's field
+                      // The Submission object has submission_id: 0 due to contract bug
+                      submission_id: registrySubmissionId,
+                      object_id: submissionObjectId, // Store the Sui object ID
                       task_id: submissionFields.task_id,
                       labeler: submissionFields.labeler,
                       result_url: extractStringBytes(submissionFields.result_url),
@@ -164,7 +172,7 @@ export function useTaskSubmissions(taskId: string | null) {
     ...rest,
     data:
       allSubmissions?.filter(
-        (submission) => submission.taskObjectId === taskId
+        (submission) => submission.taskId === taskId
       ) || [],
   };
 }

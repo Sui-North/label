@@ -21,13 +21,10 @@ export interface ProcessedSubmission {
  * Process raw submission data from blockchain
  */
 function processSubmissionData(submission: any): ProcessedSubmission {
-  const resultUrl = decodeVectorU8(submission.result_url);
-  const resultFilename = submission.result_filename
-    ? decodeVectorU8(submission.result_filename)
-    : "result.csv";
-  const resultContentType = submission.result_content_type
-    ? decodeVectorU8(submission.result_content_type)
-    : "application/octet-stream";
+  // Sui RPC already decodes Move String types to JavaScript strings
+  const resultUrl = submission.result_url || "";
+  const resultFilename = submission.result_filename || "result.csv";
+  const resultContentType = submission.result_content_type || "application/octet-stream";
 
   return {
     submissionId: submission.submission_id?.toString() || "0",
@@ -112,7 +109,21 @@ export function useAllSubmissions() {
                     submissionObject.data?.content &&
                     "fields" in submissionObject.data.content
                   ) {
-                    return submissionObject.data.content.fields;
+                    const submissionFields = submissionObject.data.content.fields as any;
+                    
+                    // Extract bytes from Move String fields
+                    const extractStringBytes = (field: any) => field?.bytes || [];
+                    
+                    return {
+                      submission_id: submissionFields.submission_id,
+                      task_id: submissionFields.task_id,
+                      labeler: submissionFields.labeler,
+                      result_url: extractStringBytes(submissionFields.result_url),
+                      result_filename: extractStringBytes(submissionFields.result_filename),
+                      result_content_type: extractStringBytes(submissionFields.result_content_type),
+                      status: submissionFields.status,
+                      submitted_at: submissionFields.submitted_at,
+                    };
                   }
                 }
                 return null;

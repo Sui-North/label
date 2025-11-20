@@ -43,6 +43,7 @@ import {
 } from "@/lib/contracts/songsim";
 import { UserDisplay } from "@/components/user-display";
 import { downloadFromWalrus } from "@/lib/walrus";
+import { Navbar } from "@/components/navbar";
 
 export default function TaskDetailPage() {
   const params = useParams();
@@ -169,36 +170,45 @@ export default function TaskDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading task details...</p>
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading task details...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (taskError) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Error loading task: {taskError.message}
-          </AlertDescription>
-        </Alert>
-      </div>
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Error loading task: {taskError.message}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </>
     );
   }
 
   if (!task) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Task not found</AlertDescription>
-        </Alert>
-      </div>
+      <>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>Task not found</AlertDescription>
+          </Alert>
+        </div>
+      </>
     );
   }
 
@@ -209,7 +219,9 @@ export default function TaskDetailPage() {
     !isDeadlinePassed && !isFull && task.status === "0" && !hasSubmitted;
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl space-y-6">
+    <>
+      <Navbar />
+      <div className="container mx-auto p-6 max-w-5xl space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="space-y-1">
@@ -493,5 +505,6 @@ export default function TaskDetailPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

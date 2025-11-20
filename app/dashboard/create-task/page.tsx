@@ -169,6 +169,16 @@ export default function CreateTaskPage() {
       return;
     }
 
+    // Validate deadline is at least 25 hours from now (24h buffer + 1h margin)
+    const deadlineTimestamp = new Date(taskData.deadline + "T23:59:59").getTime();
+    const minDeadline = Date.now() + 25 * 60 * 60 * 1000; // 25 hours from now
+    if (deadlineTimestamp < minDeadline) {
+      toast.error("Invalid deadline", {
+        description: "Deadline must be at least 25 hours from now. Contract requires 24h review buffer.",
+      });
+      return;
+    }
+
     if (taskData.datasetFiles.length === 0) {
       toast.error("No dataset files", {
         description: "Please select dataset files to upload",
@@ -250,6 +260,7 @@ export default function CreateTaskPage() {
           tx.pure.u64(parseInt(taskData.requiredLabelers)),
           tx.pure.u64(deadlineTimestamp),
           bountyCoin,
+          tx.object("0x6"), // Clock object required by contract
         ],
       });
 
@@ -473,8 +484,10 @@ export default function CreateTaskPage() {
             onChange={(e) =>
               setTaskData({ ...taskData, deadline: e.target.value })
             }
-            min={new Date().toISOString().split("T")[0]}
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            ⚠️ Submissions close 24 hours before deadline for review. Set at least 25+ hours from now.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

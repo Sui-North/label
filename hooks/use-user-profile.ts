@@ -34,15 +34,23 @@ function processProfileData(
 ): ProcessedProfile | null {
   if (!profile) return null;
 
-  const displayName = decodeVectorU8(profile.display_name);
-  const bio = decodeVectorU8(profile.bio);
+  console.log("Processing profile data:", {
+    display_name: profile.display_name,
+    bio: profile.bio,
+    avatar_url: profile.avatar_url,
+  });
 
-  // Avatar URL is now stored directly in the contract
-  let avatarUrl: string | null = null;
-  if (profile.avatar_url && profile.avatar_url.length > 0) {
-    avatarUrl = decodeVectorU8(profile.avatar_url);
-    console.log("Avatar URL (from contract):", avatarUrl);
-  }
+  // Sui RPC already decodes Move String types to JavaScript strings
+  const displayName = profile.display_name || "";
+  const bio = profile.bio || "";
+  const avatarUrl = profile.avatar_url || null;
+
+  console.log("Processed profile data:", {
+    displayName,
+    bio,
+    avatarUrl,
+    displayNameLength: displayName.length,
+  });
 
   return {
     objectId: profile.objectId,

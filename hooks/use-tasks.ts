@@ -32,16 +32,13 @@ export interface ProcessedTask {
  * Process raw task data from blockchain
  */
 function processTaskData(task: any): ProcessedTask {
-  const title = decodeVectorU8(task.title);
-  const description = decodeVectorU8(task.description);
-  const instructions = decodeVectorU8(task.instructions);
-  const datasetUrl = decodeVectorU8(task.dataset_url);
-  const datasetFilename = task.dataset_filename
-    ? decodeVectorU8(task.dataset_filename)
-    : "dataset.csv";
-  const datasetContentType = task.dataset_content_type
-    ? decodeVectorU8(task.dataset_content_type)
-    : "application/octet-stream";
+  // Sui RPC already decodes Move String types to JavaScript strings
+  const title = task.title || "";
+  const description = task.description || "";
+  const instructions = task.instructions || "";
+  const datasetUrl = task.dataset_url || "";
+  const datasetFilename = task.dataset_filename || "dataset.csv";
+  const datasetContentType = task.dataset_content_type || "application/octet-stream";
 
   return {
     objectId: task.objectId,

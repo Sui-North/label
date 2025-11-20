@@ -42,6 +42,7 @@ import {
   PLATFORM_CONFIG_ID,
   PACKAGE_ID,
   finalizeConsensusTransaction,
+  extendDeadlineTransaction,
 } from "@/lib/contracts/songsim";
 import { toast } from "sonner";
 import {
@@ -55,6 +56,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { UserDisplay } from "@/components/user-display";
 import { ConsensusDialog } from "@/components/consensus-dialog";
 import { ReviewSubmissionDialog } from "@/components/review-submission-dialog";
@@ -93,6 +105,9 @@ export default function TaskDetailPage({
   const [selectedSubmission, setSelectedSubmission] =
     useState<ProcessedSubmission | null>(null);
   const [error, setError] = useState("");
+  const [extendDialogOpen, setExtendDialogOpen] = useState(false);
+  const [newDeadline, setNewDeadline] = useState("");
+  const [isExtending, setIsExtending] = useState(false);
 
   // Use the consensus hook for state management
   const {
@@ -120,6 +135,72 @@ export default function TaskDetailPage({
     // Use the hook's finalizeConsensus method
     await finalizeConsensus(acceptedIds, acceptedLabelers, rejectedIds);
     setConsensusDialogOpen(false);
+  };
+
+  const handleExtendDeadline = async () => {
+    if (!account || !task || !newDeadline) return;
+
+    // Validate new deadline
+    const newDeadlineTimestamp = new Date(newDeadline + "T23:59:59").getTime();
+    const currentDeadline = parseInt(task.deadline);
+    const minDeadline = Date.now() + 25 * 60 * 60 * 1000; // 25 hours from now
+
+    if (newDeadlineTimestamp <= currentDeadline) {
+      toast.error("Invalid deadline", {
+        description: "New deadline must be later than current deadline.",
+      });
+      return;
+    }
+
+    if (newDeadlineTimestamp < minDeadline) {
+      toast.error("Invalid deadline", {
+        description: "Deadline must be at least 25 hours from now (24h review buffer required).",
+      });
+      return;
+    }
+
+    setIsExtending(true);
+    setError("");
+
+    try {
+      const tx = extendDeadlineTransaction(taskObjectId, newDeadlineTimestamp);
+
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result) => {
+            console.log("Deadline extended:", result);
+            toast.success("Deadline extended successfully", {
+              description: `New deadline: ${new Date(newDeadlineTimestamp).toLocaleDateString()}`,
+            });
+            // Invalidate queries
+            queryClient.invalidateQueries({ queryKey: ["task", taskObjectId] });
+            queryClient.invalidateQueries({ queryKey: ["myTasks"] });
+            setExtendDialogOpen(false);
+            setNewDeadline("");
+            setIsExtending(false);
+          },
+          onError: (error) => {
+            console.error("Failed to extend deadline:", error);
+            setError(`Failed to extend deadline: ${error.message}`);
+            toast.error("Failed to extend deadline", {
+              description: error.message,
+            });
+            setIsExtending(false);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error extending deadline:", error);
+      const message = error instanceof Error ? error.message : "Unknown error";
+      setError(message);
+      toast.error("Error extending deadline", {
+        description: message,
+      });
+      setIsExtending(false);
+    }
   };
 
   const handleCancelTask = async () => {
@@ -581,6 +662,84 @@ export default function TaskDetailPage({
                     Cannot cancel task with submissions
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Extend Deadline */}
+          {(task.status === "0" || task.status === "1") && (
+            <Card className="border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600">
+                  Extend Deadline
+                </CardTitle>
+                <CardDescription>
+                  Current deadline: {new Date(parseInt(task.deadline)).toLocaleDateString()}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Dialog open={extendDialogOpen} onOpenChange={setExtendDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      variant="default"
+                    >
+                      <Clock className="h-4 w-4 mr-2" />
+                      Extend Deadline
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Extend Task Deadline</DialogTitle>
+                      <DialogDescription>
+                        Set a new deadline for this task. The new deadline must be later than the current deadline and at least 25 hours from now.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div>
+                        <Label htmlFor="new-deadline">New Deadline</Label>
+                        <Input
+                          id="new-deadline"
+                          type="date"
+                          value={newDeadline}
+                          onChange={(e) => setNewDeadline(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          ⚠️ Submissions close 24 hours before deadline for review
+                        </p>
+                      </div>
+                      {error && (
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setExtendDialogOpen(false);
+                          setNewDeadline("");
+                          setError("");
+                        }}
+                        disabled={isExtending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleExtendDeadline}
+                        disabled={isExtending || !newDeadline}
+                      >
+                        {isExtending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Extend Deadline
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Give labelers more time to complete the task
+                </p>
               </CardContent>
             </Card>
           )}

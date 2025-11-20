@@ -28,9 +28,9 @@ interface TableField {
 export interface UserProfileData {
   objectId: string;
   owner: string;
-  display_name: number[];
-  bio: number[];
-  avatar_url: number[];
+  display_name: string;
+  bio: string;
+  avatar_url: string;
   user_type: number;
   created_at: string;
   tasks_created: string;
@@ -94,6 +94,7 @@ export function createProfileTransaction(
       tx.pure.vector("u8", bioBytes),
       tx.pure.vector("u8", avatarUrlBytes),
       tx.pure.u8(userType),
+      tx.object(CLOCK_ID), // Clock object required by contract
     ],
   });
 
@@ -153,6 +154,8 @@ export function createTaskTransaction(
   configId: string,
   profileObjectId: string,
   datasetUrl: string,
+  datasetFilename: string,
+  datasetContentType: string,
   title: string,
   description: string,
   instructions: string,
@@ -163,6 +166,12 @@ export function createTaskTransaction(
   const tx = new Transaction();
 
   const datasetUrlBytes = Array.from(new TextEncoder().encode(datasetUrl));
+  const datasetFilenameBytes = Array.from(
+    new TextEncoder().encode(datasetFilename)
+  );
+  const datasetContentTypeBytes = Array.from(
+    new TextEncoder().encode(datasetContentType)
+  );
   const titleBytes = Array.from(new TextEncoder().encode(title));
   const descriptionBytes = Array.from(new TextEncoder().encode(description));
   const instructionsBytes = Array.from(new TextEncoder().encode(instructions));
@@ -174,12 +183,15 @@ export function createTaskTransaction(
       tx.object(configId),
       tx.object(profileObjectId),
       tx.pure.vector("u8", datasetUrlBytes),
+      tx.pure.vector("u8", datasetFilenameBytes),
+      tx.pure.vector("u8", datasetContentTypeBytes),
       tx.pure.vector("u8", titleBytes),
       tx.pure.vector("u8", descriptionBytes),
       tx.pure.vector("u8", instructionsBytes),
       tx.pure.u64(requiredLabelers),
       tx.pure.u64(deadline),
       tx.object(bountyCoinId),
+      tx.object(CLOCK_ID), // Clock object required by contract
     ],
   });
 
@@ -214,6 +226,7 @@ export function submitLabelsTransaction(
       tx.pure.vector("u8", resultUrlBytes),
       tx.pure.vector("u8", filenameBytes),
       tx.pure.vector("u8", contentTypeBytes),
+      tx.object(CLOCK_ID), // Clock object required by contract
     ],
   });
 
@@ -225,19 +238,39 @@ export function submitLabelsTransaction(
  * Requires the task to be in OPEN status with no submissions
  * The bounty amount will be split from the gas coin and refunded to the requester
  */
-export function cancelTaskTransaction(
+export function cancelTaskTransaction(taskObjectId: string): Transaction {
+  const tx = new Transaction();
+
+  // Call cancel_task with the task object and clock
+  // Contract signature: entry fun cancel_task(labeling_task: &mut Task, clock: &Clock, ctx: &mut TxContext)
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::cancel_task`,
+    arguments: [tx.object(taskObjectId), tx.object(CLOCK_ID)],
+  });
+
+  return tx;
+}
+
+/**
+ * Extend task deadline transaction
+ * Only the requester can extend the deadline for open or in-progress tasks
+ * New deadline must be in the future and greater than current deadline
+ */
+export function extendDeadlineTransaction(
   taskObjectId: string,
-  bountyAmount: number
+  newDeadline: number
 ): Transaction {
   const tx = new Transaction();
 
-  // Split the bounty amount from gas coin
-  const [bountyCoin] = tx.splitCoins(tx.gas, [bountyAmount]);
-
-  // Call cancel_task with the task object and bounty coin
+  // Call extend_deadline with task object, new deadline, and clock
+  // Contract signature: public fun extend_deadline(labeling_task: &mut Task, new_deadline: u64, clock: &Clock, ctx: &TxContext)
   tx.moveCall({
-    target: `${PACKAGE_ID}::songsim::cancel_task`,
-    arguments: [tx.object(taskObjectId), bountyCoin],
+    target: `${PACKAGE_ID}::songsim::extend_deadline`,
+    arguments: [
+      tx.object(taskObjectId),
+      tx.pure.u64(newDeadline),
+      tx.object(CLOCK_ID),
+    ],
   });
 
   return tx;
@@ -308,12 +341,26 @@ export async function getUserProfile(
           profileObject.data.content.dataType === "moveObject"
         ) {
           const profileFields = profileObject.data.content.fields as MoveObject;
+          
+          console.log("Raw profile fields from blockchain:", profileFields);
+          
+          // Sui RPC returns Move String type as plain JavaScript strings
+          const displayName = profileFields.display_name as string;
+          const bio = profileFields.bio as string;
+          const avatarUrl = profileFields.avatar_url as string;
+          
+          console.log("Extracted strings:", {
+            displayName,
+            bio,
+            avatarUrl,
+          });
+          
           return {
             objectId: profileObjectId,
             owner: profileFields.owner as string,
-            display_name: profileFields.display_name as number[],
-            bio: profileFields.bio as number[],
-            avatar_url: profileFields.avatar_url as number[],
+            display_name: displayName,
+            bio: bio,
+            avatar_url: avatarUrl,
             user_type: profileFields.user_type as number,
             created_at: profileFields.created_at as string,
             tasks_created: profileFields.tasks_created as string,
@@ -419,10 +466,26 @@ export async function getAllTasks(client: SuiClient, registryId: string) {
             taskObject.data.content.dataType === "moveObject"
           ) {
             const taskFields = taskObject.data.content.fields as MoveObject;
+            
+            // Sui RPC returns Move String types as plain JavaScript strings
             tasks.push({
               objectId: taskObjectId,
               taskId: field.name.value,
-              ...taskFields,
+              task_id: taskFields.task_id,
+              requester: taskFields.requester,
+              title: taskFields.title as string,
+              description: taskFields.description as string,
+              instructions: taskFields.instructions as string,
+              dataset_url: taskFields.dataset_url as string,
+              dataset_filename: taskFields.dataset_filename as string,
+              dataset_content_type: taskFields.dataset_content_type as string,
+              required_labelers: taskFields.required_labelers,
+              deadline: taskFields.deadline,
+              status: taskFields.status,
+              created_at: taskFields.created_at,
+              submission_count: taskFields.submission_count,
+              bounty: taskFields.bounty,
+              bounty_amount: taskFields.bounty_amount,
             });
           }
         }
@@ -462,10 +525,25 @@ export async function getUserOwnedTasks(
     for (const obj of ownedObjects.data) {
       if (obj.data?.content && obj.data.content.dataType === "moveObject") {
         const taskFields = obj.data.content.fields as MoveObject;
+        
         tasks.push({
           objectId: obj.data.objectId,
           taskId: taskFields.task_id,
-          ...taskFields,
+          task_id: taskFields.task_id,
+          requester: taskFields.requester,
+          title: taskFields.title as string,
+          description: taskFields.description as string,
+          instructions: taskFields.instructions as string,
+          dataset_url: taskFields.dataset_url as string,
+          dataset_filename: taskFields.dataset_filename as string,
+          dataset_content_type: taskFields.dataset_content_type as string,
+          required_labelers: taskFields.required_labelers,
+          deadline: taskFields.deadline,
+          status: taskFields.status,
+          created_at: taskFields.created_at,
+          submission_count: taskFields.submission_count,
+          bounty: taskFields.bounty,
+          bounty_amount: taskFields.bounty_amount,
         });
       }
     }
@@ -520,7 +598,7 @@ export function finalizeConsensusTransaction(
   }
 
   tx.moveCall({
-    target: `${PACKAGE_ID}::consensus::finalize_consensus`,
+    target: `${PACKAGE_ID}::songsim::finalize_consensus`,
     arguments: [
       tx.object(configId),
       tx.object(taskObjectId),

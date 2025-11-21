@@ -19,10 +19,10 @@ const Hero3DScene = dynamic(
   { ssr: false }
 );
 
-const MorphingShapeCanvas = dynamic(
+const DataCoreCanvas = dynamic(
   () =>
-    import("@/components/morphing-shape-canvas").then((mod) => ({
-      default: mod.MorphingShapeCanvas,
+    import("@/components/data-core-canvas").then((mod) => ({
+      default: mod.DataCoreCanvas,
     })),
   { ssr: false }
 );
@@ -88,9 +88,9 @@ export function HeroSection() {
               </FadeIn>
             </div>
 
-            {/* 3D Morphing Shape - Right Side */}
+            {/* 3D Data Core - Right Side */}
             <FadeIn delay={0.4} className="flex-1 w-full lg:w-auto">
-              <MorphingShapeCanvas />
+              <DataCoreCanvas />
             </FadeIn>
           </div>
 

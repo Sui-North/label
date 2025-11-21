@@ -25,10 +25,12 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { ParticleField } from "@/components/interactive/particle-field";
+import { ActiveGrid } from "@/components/interactive/active-grid";
+import { EnergyWaves } from "@/components/interactive/energy-waves";
 import { useAllTasks } from "@/hooks/use-tasks";
 import { useAllSubmissions } from "@/hooks/use-submissions";
-import { CursorCanvas } from "@/components/cursor-effects/cursor-canvas";
-import { SectionTrigger } from "@/components/cursor-effects/section-trigger";
+
 
 export default function HomePage() {
   const { data: tasks, isLoading: tasksLoading } = useAllTasks();
@@ -45,20 +47,19 @@ export default function HomePage() {
 
   return (
     <>
-      <CursorCanvas />
+
       <Navbar />
       <div className="relative overflow-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full pointer-events-none -z-10 opacity-50" />
         
         {/* Hero Section */}
-        <SectionTrigger effect="hero">
-          <HeroSection />
-        </SectionTrigger>
+        <HeroSection />
 
         {/* Features Section */}
-        <SectionTrigger effect="features">
+
         <section className="py-24 relative">
+          <ParticleField />
           <div className="container px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-2xl text-center mb-16">
               <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
@@ -150,10 +151,8 @@ export default function HomePage() {
             </StaggerContainer>
           </div>
         </section>
-        </SectionTrigger>
 
         {/* How It Works - Requesters */}
-        <SectionTrigger effect="default">
         <section className="py-24 relative bg-muted/30">
           <div className="container px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-6xl">
@@ -215,11 +214,11 @@ export default function HomePage() {
             </FadeIn>
           </div>
         </section>
-        </SectionTrigger>
+
 
         {/* Stats Section */}
-        <SectionTrigger effect="stats">
         <section className="py-20 relative overflow-hidden">
+           <ActiveGrid />
            <div className="absolute inset-0 bg-primary/5" />
            <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
             <FadeIn className="mx-auto max-w-2xl text-center mb-12">
@@ -262,11 +261,11 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        </SectionTrigger>
+
 
         {/* CTA Section */}
-        <SectionTrigger effect="cta">
         <section className="py-24 relative overflow-hidden">
+          <EnergyWaves />
           <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
             <FadeIn>
               <div className="glass-card rounded-3xl p-8 md:p-16 text-center max-w-4xl mx-auto border-primary/20 relative overflow-hidden">
@@ -305,7 +304,7 @@ export default function HomePage() {
             </FadeIn>
           </div>
         </section>
-        </SectionTrigger>
+
 
         {/* Footer */}
         <footer className="border-t py-12 bg-muted/30">

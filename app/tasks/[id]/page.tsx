@@ -110,11 +110,19 @@ export default function TaskDetailPage() {
         return;
       }
 
+      // Validate quality tracker ID
+      if (!task.qualityTrackerId) {
+        setError("Task is missing quality tracker. This may be a legacy task created before V3 upgrade.");
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create submission transaction using task's object ID
       const tx = submitLabelsTransaction(
         TASK_REGISTRY_ID,
         task.objectId,
         profile.objectId,
+        task.qualityTrackerId,
         resultUrl,
         filename,
         contentType

@@ -26,6 +26,8 @@ export interface ProcessedTask {
   currentLabelers: string;
   status: string;
   createdAt: string;
+  qualityTrackerId?: string; // Quality tracker object ID from registry
+  requesterProfileId?: string; // Requester profile object ID from registry
 }
 
 /**
@@ -57,6 +59,8 @@ function processTaskData(task: any): ProcessedTask {
     status:
       typeof task.status === "number" ? task.status.toString() : task.status,
     createdAt: task.created_at,
+    qualityTrackerId: task.quality_tracker_id, // From registry lookup
+    requesterProfileId: task.requester_profile_id, // From registry lookup
   };
 }
 

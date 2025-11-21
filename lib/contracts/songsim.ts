@@ -208,6 +208,7 @@ export function submitLabelsTransaction(
   registryId: string,
   taskObjectId: string,
   profileObjectId: string,
+  qualityTrackerId: string,
   resultUrl: string,
   resultFilename: string,
   resultContentType: string
@@ -226,6 +227,7 @@ export function submitLabelsTransaction(
       tx.object(registryId),
       tx.object(taskObjectId),
       tx.object(profileObjectId),
+      tx.object(qualityTrackerId),
       tx.pure.vector("u8", resultUrlBytes),
       tx.pure.vector("u8", filenameBytes),
       tx.pure.vector("u8", contentTypeBytes),
@@ -478,6 +480,42 @@ export async function getAllTasks(client: SuiClient, registryId: string) {
           ) {
             const taskFields = taskObject.data.content.fields as MoveObject;
             
+            // Fetch quality tracker ID from registry
+            const qualityTrackersTable = fields.quality_trackers as TableField;
+            const qualityTrackersTableId = qualityTrackersTable.fields.id.id;
+            let qualityTrackerId: string | undefined;
+            
+            try {
+              const qualityTrackerField = await client.getDynamicFieldObject({
+                parentId: qualityTrackersTableId,
+                name: { type: "u64", value: field.name.value as string },
+              });
+              if (qualityTrackerField.data?.content && qualityTrackerField.data.content.dataType === "moveObject") {
+                const qtFieldContent = qualityTrackerField.data.content.fields as MoveObject;
+                qualityTrackerId = qtFieldContent.value as string;
+              }
+            } catch (e) {
+              console.warn(`No quality tracker for task ${field.name.value}`);
+            }
+
+            // Fetch requester profile ID from registry
+            const profilesTable = fields.profiles as TableField;
+            const profilesTableId = profilesTable.fields.id.id;
+            let requesterProfileId: string | undefined;
+            
+            try {
+              const profileField = await client.getDynamicFieldObject({
+                parentId: profilesTableId,
+                name: { type: "address", value: taskFields.requester as string },
+              });
+              if (profileField.data?.content && profileField.data.content.dataType === "moveObject") {
+                const profileFieldContent = profileField.data.content.fields as MoveObject;
+                requesterProfileId = profileFieldContent.value as string;
+              }
+            } catch (e) {
+              console.warn(`No profile found for requester ${taskFields.requester}`);
+            }
+
             // Sui RPC returns Move String types as plain JavaScript strings
             tasks.push({
               objectId: taskObjectId,
@@ -497,6 +535,8 @@ export async function getAllTasks(client: SuiClient, registryId: string) {
               submission_count: taskFields.submission_count,
               bounty: taskFields.bounty,
               bounty_amount: taskFields.bounty_amount,
+              quality_tracker_id: qualityTrackerId,
+              requester_profile_id: requesterProfileId,
             });
           }
         }

@@ -117,7 +117,12 @@ export default function TaskDetailPage({
     toggleReject,
     finalizeConsensus,
     isProcessing: isFinalizingConsensus,
-  } = useConsensus(taskObjectId, task?.taskId || "");
+  } = useConsensus(
+    taskObjectId,
+    task?.taskId || "",
+    task?.requesterProfileId,
+    task?.qualityTrackerId
+  );
 
   // Toggle functions are now provided by useConsensus hook
 
@@ -141,8 +146,13 @@ export default function TaskDetailPage({
       .filter((s) => acceptedObjectIds.includes(s.objectId))
       .map((s) => s.labeler);
 
-    // Use the hook's finalizeConsensus method
-    await finalizeConsensus(acceptedIds, acceptedLabelers, rejectedIds);
+    // Extract labeler addresses for rejected submissions
+    const rejectedLabelers = submissions
+      .filter((s) => rejectedObjectIds.includes(s.objectId))
+      .map((s) => s.labeler);
+
+    // Use the hook's finalizeConsensus method with rejected labelers
+    await finalizeConsensus(acceptedIds, acceptedLabelers, rejectedIds, rejectedLabelers);
     setConsensusDialogOpen(false);
   };
 

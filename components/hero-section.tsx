@@ -2,13 +2,15 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "@/components/animated-components";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // Dynamically import 3D components with no SSR
 const Hero3DScene = dynamic(
@@ -28,18 +30,30 @@ const DataCoreCanvas = dynamic(
 );
 
 export function HeroSection() {
+  const { resolvedTheme } = useTheme();
+  
   return (
     <section className="relative overflow-hidden min-h-[90vh] flex items-center">
       <Hero3DScene />
 
-      <div className="container relative z-10 py-20 md:py-32">
+      <div className="container relative z-10 py-20 md:py-32 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             {/* Text Content - Left Side */}
             <div className="flex-1 text-center lg:text-left">
               <FadeIn className="mb-8">
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm backdrop-blur">
-                  <Sparkles className="h-4 w-4 text-blue-400" />
+                  <Image
+                    src={
+                      resolvedTheme === "dark"
+                        ? "/sui-logo-pack/Sui Symbol White/Sui_Symbol_White.svg"
+                        : "/sui-logo-pack/Sui Symbol Sea/Sui_Symbol_Sea.svg"
+                    }
+                    alt="Sui Symbol"
+                    width={16}
+                    height={16}
+                    className="h-4 w-4"
+                  />
                   <span className="font-medium text-blue-300">
                     Powered by Sui Blockchain
                   </span>

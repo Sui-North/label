@@ -35,6 +35,11 @@ import {
   CheckCircle,
   Download,
   Loader2,
+  ArrowLeft,
+  Share2,
+  FileCode,
+  CheckCircle2,
+  Shield,
 } from "lucide-react";
 import { uploadToWalrus } from "@/lib/walrus";
 import {
@@ -180,11 +185,12 @@ export default function TaskDetailPage() {
     return (
       <>
         <Navbar />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading task details...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+            <Loader2 className="h-12 w-12 animate-spin text-primary relative z-10" />
           </div>
+          <p className="text-muted-foreground font-medium">Loading task details...</p>
         </div>
       </>
     );
@@ -194,8 +200,8 @@ export default function TaskDetailPage() {
     return (
       <>
         <Navbar />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Alert variant="destructive">
+        <div className="flex items-center justify-center min-h-[60vh] p-4">
+          <Alert variant="destructive" className="max-w-md">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Error loading task: {taskError.message}
@@ -210,8 +216,8 @@ export default function TaskDetailPage() {
     return (
       <>
         <Navbar />
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Alert variant="destructive">
+        <div className="flex items-center justify-center min-h-[60vh] p-4">
+          <Alert variant="destructive" className="max-w-md">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>Task not found</AlertDescription>
           </Alert>
@@ -227,296 +233,416 @@ export default function TaskDetailPage() {
     !isDeadlinePassed && !isFull && task.status === "0" && !hasSubmitted;
 
   return (
-    <>
+    <div className="min-h-screen bg-background pb-12">
       <Navbar />
-      <div className="container mx-auto p-6 max-w-5xl space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold">{task.title}</h1>
-          <p className="text-muted-foreground">{task.description}</p>
-        </div>
-        <Badge
-          variant={
-            task.status === "0"
-              ? "default"
-              : task.status === "1"
-              ? "secondary"
-              : task.status === "2"
-              ? "outline"
-              : "destructive"
-          }
-        >
-          {task.status === "0"
-            ? "Open"
-            : task.status === "1"
-            ? "In Progress"
-            : task.status === "2"
-            ? "Completed"
-            : "Cancelled"}
-        </Badge>
-      </div>
-
-      {/* Task Info */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Bounty</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-500" />
-              <span className="text-2xl font-bold">
-                {(parseInt(task.bounty) / 1_000_000_000).toFixed(2)} SUI
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Deadline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-blue-500" />
-              <span className="font-medium">
-                {new Date(parseInt(task.deadline)).toLocaleDateString()}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Labelers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-purple-500" />
-              <span className="font-medium">
-                {task.currentLabelers}/{task.requiredLabelers}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Submissions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="font-medium">{submissions.length}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Instructions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Instructions</CardTitle>
-          <CardDescription>
-            Follow these guidelines to complete the task
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="whitespace-pre-wrap text-sm">{task.instructions}</div>
-        </CardContent>
-      </Card>
-
-      {/* Dataset */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Dataset</CardTitle>
-          <CardDescription>
-            Download the dataset to begin labeling
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <FileText className="h-8 w-8 text-blue-500" />
-              <div>
-                <p className="font-medium">Dataset File</p>
-                <p className="text-sm text-muted-foreground">
-                  Click to download from Walrus
-                </p>
+      
+      {/* Hero Header */}
+      <div className="relative bg-muted/30 border-b pb-12 pt-8">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-4 max-w-6xl relative z-10">
+          <Button 
+            variant="ghost" 
+            className="mb-6 hover:bg-background/50" 
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Tasks
+          </Button>
+          
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+            <div className="space-y-4 max-w-3xl">
+              <div className="flex items-center gap-3">
+                <Badge
+                  className={`px-3 py-1 text-sm ${
+                    task.status === "0"
+                      ? "bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20"
+                      : task.status === "1"
+                      ? "bg-blue-500/10 text-blue-600 border-blue-200 hover:bg-blue-500/20"
+                      : task.status === "2"
+                      ? "bg-gray-500/10 text-gray-600 border-gray-200 hover:bg-gray-500/20"
+                      : "bg-red-500/10 text-red-600 border-red-200 hover:bg-red-500/20"
+                  }`}
+                >
+                  {task.status === "0"
+                    ? "Open for Submissions"
+                    : task.status === "1"
+                    ? "In Progress"
+                    : task.status === "2"
+                    ? "Completed"
+                    : "Cancelled"}
+                </Badge>
+                <span className="text-muted-foreground text-sm font-mono">#{task.taskId}</span>
               </div>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {task.title}
+              </h1>
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                {task.description}
+              </p>
             </div>
-            <Button
-              onClick={() =>
-                downloadFromWalrus(
-                  task.datasetUrl,
-                  task.datasetFilename || `task-${task.taskId}-dataset.csv`
-                )
-              }
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download Dataset
-            </Button>
+            
+            <div className="flex gap-3">
+              <Button variant="outline" className="glass-card hover:bg-background/80">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </Button>
+              {canSubmit && (
+                <Button 
+                  className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                  onClick={() => document.getElementById("submission-form")?.scrollIntoView({ behavior: "smooth" })}
+                >
+                  Submit Work
+                </Button>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Status Messages */}
-      {hasSubmitted && (
-        <Alert>
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription>
-            You have already submitted work for this task. Check the submissions
-            page for status.
-          </AlertDescription>
-        </Alert>
-      )}
+      <div className="container mx-auto px-4 max-w-6xl -mt-8 relative z-20 space-y-8">
+        {/* Key Metrics Grid */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="glass-card hover:border-primary/30 transition-colors">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Bounty</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-green-500/10">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-2xl font-bold text-foreground">
+                  {(parseInt(task.bounty) / 1_000_000_000).toFixed(2)} <span className="text-sm font-normal text-muted-foreground">SUI</span>
+                </span>
+              </div>
+            </CardContent>
+          </Card>
 
-      {isDeadlinePassed && (
-        <Alert variant="destructive">
-          <Clock className="h-4 w-4" />
-          <AlertDescription>
-            This task deadline has passed and is no longer accepting
-            submissions.
-          </AlertDescription>
-        </Alert>
-      )}
+          <Card className="glass-card hover:border-primary/30 transition-colors">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Deadline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-blue-500/10">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg">
+                    {new Date(parseInt(task.deadline)).toLocaleDateString()}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {isDeadlinePassed ? "Ended" : "Remaining"}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {isFull && !hasSubmitted && (
-        <Alert variant="destructive">
-          <Users className="h-4 w-4" />
-          <AlertDescription>
-            This task has reached its maximum number of labelers.
-          </AlertDescription>
-        </Alert>
-      )}
+          <Card className="glass-card hover:border-primary/30 transition-colors">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Labeler Spots</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-purple-500/10">
+                  <Users className="h-5 w-5 text-purple-600" />
+                </div>
+                <div className="flex flex-col w-full">
+                   <div className="flex justify-between items-baseline">
+                    <span className="font-bold text-lg">
+                      {task.currentLabelers}/{task.requiredLabelers}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {isFull ? "Full" : "Open"}
+                    </span>
+                   </div>
+                   <Progress value={(parseInt(task.currentLabelers) / parseInt(task.requiredLabelers)) * 100} className="h-1.5 mt-1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Submission Form */}
-      {canSubmit ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Submit Your Work</CardTitle>
-            <CardDescription>
-              Upload your completed labels and submit for review
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <Card className="glass-card hover:border-primary/30 transition-colors">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-orange-500/10">
+                  <CheckCircle className="h-5 w-5 text-orange-600" />
+                </div>
+                <span className="text-2xl font-bold text-foreground">{submissions.length}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {success && (
-              <Alert className="border-green-500 bg-green-500/10">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-600">
-                  {success}
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="md:col-span-2 space-y-8">
+            {/* Instructions */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Instructions
+                </CardTitle>
+                <CardDescription>
+                  Detailed guidelines for completing this task
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm dark:prose-invert max-w-none bg-muted/30 p-6 rounded-xl border">
+                  <div className="whitespace-pre-wrap">{task.instructions}</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dataset */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileCode className="h-5 w-5 text-primary" />
+                  Dataset
+                </CardTitle>
+                <CardDescription>
+                  Download the source files required for labeling
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-5 border rounded-xl bg-muted/20 hover:bg-muted/40 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <FileText className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">Dataset File</p>
+                      <p className="text-sm text-muted-foreground">
+                        Stored on Walrus Decentralized Storage
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      downloadFromWalrus(
+                        task.datasetUrl,
+                        task.datasetFilename || `task-${task.taskId}-dataset.csv`
+                      )
+                    }
+                    className="hover:border-primary/50 hover:text-primary"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status Messages */}
+            {hasSubmitted && (
+              <Alert className="bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription className="ml-2 font-medium">
+                  You have already submitted work for this task. You can track its status in your submissions dashboard.
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* Result File Upload */}
-            <div className="space-y-2">
-              <Label htmlFor="result">Result File *</Label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="result"
-                  type="file"
-                  onChange={handleFileChange}
-                  disabled={isSubmitting}
-                  className="flex-1"
-                  accept=".csv,.json,.txt,.zip"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                CSV, JSON, TXT, or ZIP file. Max 50MB.
-              </p>
-              {resultFile && (
-                <p className="text-sm text-green-600">
-                  Selected: {resultFile.name}
-                </p>
-              )}
-            </div>
+            {isDeadlinePassed && (
+              <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                <Clock className="h-4 w-4" />
+                <AlertDescription className="ml-2 font-medium">
+                  This task deadline has passed and is no longer accepting submissions.
+                </AlertDescription>
+              </Alert>
+            )}
 
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="notes">Submission Notes (Optional)</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any notes, observations, or clarifications about your work..."
-                disabled={isSubmitting}
-                rows={4}
-              />
-            </div>
+            {isFull && !hasSubmitted && (
+              <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                <Users className="h-4 w-4" />
+                <AlertDescription className="ml-2 font-medium">
+                  This task has reached its maximum number of labelers.
+                </AlertDescription>
+              </Alert>
+            )}
 
-            {/* Submit Button */}
-            <div className="flex gap-3">
-              <Button
-                onClick={handleSubmit}
-                disabled={!resultFile || isSubmitting}
-                className="flex-1"
-                size="lg"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Submit Work
-                  </>
-                )}
-              </Button>
-            </div>
+            {/* Submission Form */}
+            {canSubmit && (
+              <div id="submission-form">
+                <Card className="glass-card border-primary/20 shadow-lg shadow-primary/5">
+                  <CardHeader className="bg-primary/5 border-b border-primary/10">
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <Upload className="h-5 w-5" />
+                      Submit Your Work
+                    </CardTitle>
+                    <CardDescription>
+                      Upload your completed labels and submit for review
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6 pt-6">
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
 
-            {/* Upload Progress */}
-            {isSubmitting && uploadProgress > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Uploading and submitting...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} />
+                    {success && (
+                      <Alert className="border-green-500 bg-green-500/10 text-green-600">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <AlertDescription>
+                          {success}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    {/* Result File Upload */}
+                    <div className="space-y-3">
+                      <Label htmlFor="result" className="text-base font-medium">Result File <span className="text-destructive">*</span></Label>
+                      <div className="border-2 border-dashed rounded-xl p-8 text-center hover:bg-muted/20 transition-colors relative group">
+                        <input
+                          id="result"
+                          type="file"
+                          onChange={handleFileChange}
+                          disabled={isSubmitting}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                          accept=".csv,.json,.txt,.zip"
+                        />
+                        <div className="flex flex-col items-center gap-2 pointer-events-none">
+                           <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                             <Upload className="h-6 w-6 text-muted-foreground" />
+                           </div>
+                           {resultFile ? (
+                             <div className="space-y-1">
+                               <p className="font-semibold text-green-600">{resultFile.name}</p>
+                               <p className="text-xs text-muted-foreground">{(resultFile.size / 1024).toFixed(2)} KB</p>
+                             </div>
+                           ) : (
+                             <div className="space-y-1">
+                               <p className="font-medium">Click to upload or drag and drop</p>
+                               <p className="text-xs text-muted-foreground">CSV, JSON, TXT, or ZIP (Max 50MB)</p>
+                             </div>
+                           )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="space-y-3">
+                      <Label htmlFor="notes" className="text-base font-medium">Submission Notes (Optional)</Label>
+                      <Textarea
+                        id="notes"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Add any notes, observations, or clarifications about your work..."
+                        disabled={isSubmitting}
+                        rows={4}
+                        className="bg-background/50 resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-2">
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={!resultFile || isSubmitting}
+                        className="w-full h-12 text-base shadow-lg shadow-primary/20"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="h-4 w-4 mr-2" />
+                            Submit Work Securely
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Upload Progress */}
+                    {isSubmitting && uploadProgress > 0 && (
+                      <div className="space-y-2 bg-muted/30 p-3 rounded-lg border">
+                        <div className="flex justify-between text-sm font-medium">
+                          <span className="text-primary">
+                            {uploadProgress < 50 ? "Uploading to Walrus..." : "Confirming on Blockchain..."}
+                          </span>
+                          <span>{uploadProgress}%</span>
+                        </div>
+                        <Progress value={uploadProgress} className="h-2" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             )}
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {/* Requester Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Requester</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <UserDisplay
-              address={task.requester}
-              size="md"
-              showAddress={true}
-              showBadge={true}
-            />
-            <Separator />
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Task ID</span>
-              <Badge variant="outline">#{task.taskId}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Created</span>
-              <span className="text-sm">
-                {new Date(parseInt(task.createdAt)).toLocaleDateString()}
-              </span>
-            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Requester Info */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Task Requester</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <UserDisplay
+                      address={task.requester}
+                      size="lg"
+                      showAddress={true}
+                      showBadge={true}
+                      className="flex-col text-center"
+                    />
+                  </div>
+                  <Separator />
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Task ID</span>
+                      <Badge variant="outline" className="font-mono">#{task.taskId}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Created</span>
+                      <span>
+                        {new Date(parseInt(task.createdAt)).toLocaleDateString()}
+                      </span>
+                    </div>
+                     <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Quality Tracker</span>
+                      <span className="font-mono text-xs truncate max-w-[100px] text-muted-foreground" title={task.qualityTrackerId}>
+                        {task.qualityTrackerId ? `${task.qualityTrackerId.slice(0, 6)}...` : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Help Card */}
+            <Card className="glass-card bg-gradient-to-b from-blue-500/5 to-transparent border-blue-500/20">
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Need Help?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-2">
+                <p>
+                  Make sure your submission follows the format specified in the instructions.
+                </p>
+                <p>
+                  Quality checks are performed after submission. High quality work earns reputation points.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-    </>
   );
 }

@@ -38,6 +38,10 @@ import {
   Users,
   Upload,
   Loader2,
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import { uploadToWalrus } from "@/lib/walrus";
 import { Navbar } from "@/components/navbar";
@@ -312,34 +316,37 @@ export default function AuthPage() {
         </div>
 
         {/* Overlay for better readability */}
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm -z-10" />
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm -z-10" />
 
-        <div className="container max-w-md py-10 z-10">
-          <Card className="border-2 shadow-2xl">
-            <CardHeader className="text-center space-y-2">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+        <div className="container max-w-md py-10 z-10 px-4 animate-in fade-in zoom-in-95 duration-500">
+          <Card className="glass-card border-primary/20 shadow-2xl overflow-hidden relative">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <CardHeader className="text-center space-y-2 pb-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 ring-4 ring-primary/5">
                 <Wallet className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Welcome Back</CardTitle>
               <CardDescription className="text-base">
-                Connect your wallet to access your dashboard
+                Connect your wallet to access the Songsim Label platform
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-4">
               {!account ? (
                 <>
-                  <Alert>
-                    <AlertDescription className="text-sm">
-                      Connect your Sui wallet to sign in or create a new
-                      account. New users will be prompted to create a profile.
-                    </AlertDescription>
-                  </Alert>
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/10 text-center space-y-2">
+                     <Sparkles className="h-5 w-5 text-primary mx-auto" />
+                     <p className="text-sm font-medium">Secure & Decentralized</p>
+                     <p className="text-xs text-muted-foreground">
+                       Your keys, your data. Connect with Sui Wallet to sign in or create a new account.
+                     </p>
+                  </div>
 
                   <div className="flex flex-col gap-4">
-                    <ConnectButton
-                      connectText="Connect Wallet to Sign In"
-                      className="w-full"
-                    />
+                    <div className="w-full [&_button]:w-full [&_button]:bg-primary [&_button]:hover:bg-primary/90 [&_button]:text-primary-foreground [&_button]:shadow-lg [&_button]:shadow-primary/20 [&_button]:h-11 [&_button]:rounded-xl [&_button]:font-medium">
+                      <ConnectButton
+                        connectText="Connect Wallet"
+                      />
+                    </div>
 
                     <div className="text-center text-sm text-muted-foreground">
                       <p>Don&apos;t have a Sui wallet?</p>
@@ -347,7 +354,7 @@ export default function AuthPage() {
                         href="https://suiwallet.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline"
+                        className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
                       >
                         Get Sui Wallet
                       </a>
@@ -355,51 +362,64 @@ export default function AuthPage() {
                   </div>
                 </>
               ) : (
-                <div className="space-y-4">
-                  <Alert>
-                    <AlertDescription className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                      Wallet connected
-                    </AlertDescription>
-                  </Alert>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 text-green-600 rounded-xl border border-green-500/20">
+                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="font-medium text-sm">Wallet Connected</span>
+                  </div>
 
                   {isCheckingProfile && (
-                    <div className="flex flex-col items-center gap-3 py-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                      <p className="text-sm text-muted-foreground">
-                        Checking your profile...
+                    <div className="flex flex-col items-center gap-4 py-8">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="h-10 w-10 animate-spin text-primary relative z-10" />
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium animate-pulse">
+                        Verifying profile status...
                       </p>
                     </div>
                   )}
 
                   {!isCheckingProfile && error && (
-                    <Alert variant="destructive">
+                    <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
 
                   {!isCheckingProfile && !error && !hasProfile && (
-                    <Button
-                      onClick={() => setShowProfileDialog(true)}
-                      className="w-full"
-                    >
-                      Create Profile
-                    </Button>
+                    <div className="space-y-4">
+                       <div className="text-center space-y-2">
+                         <p className="font-semibold text-lg">Almost there!</p>
+                         <p className="text-sm text-muted-foreground">We couldn&apos;t find a profile for this wallet address. Create one to get started.</p>
+                       </div>
+                      <Button
+                        onClick={() => setShowProfileDialog(true)}
+                        className="w-full h-11 text-base shadow-lg shadow-primary/20"
+                      >
+                        Create Profile <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
 
                   {hasProfile && (
-                    <div className="text-center text-sm text-muted-foreground">
-                      <p>Profile found! Redirecting to dashboard...</p>
+                    <div className="text-center py-8 space-y-3">
+                      <div className="h-12 w-12 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">Profile Verified</p>
+                        <p className="text-sm text-muted-foreground">Redirecting you to the dashboard...</p>
+                      </div>
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t border-border/50">
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/")}
-                  className="w-full"
+                  className="w-full hover:bg-muted/50"
                 >
                   Back to Home
                 </Button>
@@ -410,9 +430,9 @@ export default function AuthPage() {
 
         {/* Profile Creation Dialog */}
         <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto glass-card border-primary/20">
             <DialogHeader>
-              <DialogTitle className="text-2xl">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                 Create Your Profile
               </DialogTitle>
               <DialogDescription>
@@ -424,7 +444,7 @@ export default function AuthPage() {
             <div className="space-y-6 py-4">
               {/* Display Name */}
               <div className="space-y-2">
-                <Label htmlFor="displayName">
+                <Label htmlFor="displayName" className="text-base">
                   Display Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -436,15 +456,16 @@ export default function AuthPage() {
                   placeholder="Enter your display name"
                   maxLength={50}
                   disabled={isCreatingProfile}
+                  className="bg-background/50 h-11"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground text-right">
                   {formData.displayName.length}/50 characters
                 </p>
               </div>
 
               {/* Bio */}
               <div className="space-y-2">
-                <Label htmlFor="bio">Bio (Optional)</Label>
+                <Label htmlFor="bio" className="text-base">Bio (Optional)</Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
@@ -455,47 +476,67 @@ export default function AuthPage() {
                   rows={4}
                   maxLength={500}
                   disabled={isCreatingProfile}
+                  className="bg-background/50 resize-none"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground text-right">
                   {formData.bio.length}/500 characters
                 </p>
               </div>
 
               {/* Avatar Upload */}
               <div className="space-y-2">
-                <Label htmlFor="avatar">Profile Picture (Optional)</Label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="file"
-                    id="avatar"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    disabled={isCreatingProfile}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById("avatar")?.click()}
-                    disabled={isCreatingProfile}
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    Choose Image
-                  </Button>
-                  {formData.avatarFile && (
-                    <div className="text-sm">
-                      <p className="font-medium truncate max-w-[200px]">
-                        {formData.avatarFile.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(formData.avatarFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                <Label htmlFor="avatar" className="text-base">Profile Picture (Optional)</Label>
+                <div className="flex items-center gap-4 p-4 border rounded-xl bg-muted/20">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border">
+                     {formData.avatarFile ? (
+                        <img src={URL.createObjectURL(formData.avatarFile)} alt="Preview" className="h-full w-full object-cover" />
+                     ) : (
+                        <UserCircle className="h-8 w-8 text-muted-foreground" />
+                     )}
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      id="avatar"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      disabled={isCreatingProfile}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById("avatar")?.click()}
+                        disabled={isCreatingProfile}
+                      >
+                        <Upload className="mr-2 h-3 w-3" />
+                        Choose Image
+                      </Button>
+                      {formData.avatarFile && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setFormData({...formData, avatarFile: null})}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          Remove
+                        </Button>
+                      )}
                     </div>
-                  )}
+                    {formData.avatarFile ? (
+                      <p className="text-xs text-muted-foreground mt-1 truncate max-w-[200px]">
+                        {formData.avatarFile.name} ({(formData.avatarFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Max 5MB. JPG, PNG, GIF, WebP
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Max 5MB. Supported formats: JPG, PNG, GIF, WebP
-                </p>
               </div>
 
               {/* User Type Selection */}
@@ -513,11 +554,15 @@ export default function AuthPage() {
                   }
                   disabled={isCreatingProfile}
                 >
-                  <div className="space-y-3">
+                  <div className="grid gap-3">
                     {ROLE_OPTIONS.map((option) => (
                       <div
                         key={option.value}
-                        className="relative flex items-start space-x-3 rounded-lg border p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+                        className={`relative flex items-start space-x-3 rounded-xl border p-4 transition-all cursor-pointer ${
+                          formData.userType === option.value 
+                            ? "bg-primary/5 border-primary ring-1 ring-primary/20" 
+                            : "hover:bg-muted/50 border-border"
+                        }`}
                         onClick={() =>
                           !isCreatingProfile &&
                           setFormData({ ...formData, userType: option.value })
@@ -533,7 +578,9 @@ export default function AuthPage() {
                           className="flex-1 cursor-pointer space-y-1"
                         >
                           <div className="flex items-center gap-2">
-                            <div className="text-primary">{option.icon}</div>
+                            <div className={`${formData.userType === option.value ? "text-primary" : "text-muted-foreground"}`}>
+                              {option.icon}
+                            </div>
                             <span className="font-semibold">
                               {option.label}
                             </span>
@@ -550,18 +597,18 @@ export default function AuthPage() {
 
               {/* Upload Progress */}
               {isCreatingProfile && uploadProgress > 0 && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>
+                <div className="space-y-2 bg-muted/30 p-3 rounded-lg border">
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-primary">
                       {uploadProgress < 50
-                        ? "Uploading avatar..."
+                        ? "Uploading avatar to Walrus..."
                         : uploadProgress < 70
-                        ? "Creating transaction..."
-                        : "Processing..."}
+                        ? "Creating blockchain transaction..."
+                        : "Finalizing profile..."}
                     </span>
                     <span>{Math.round(uploadProgress)}%</span>
                   </div>
-                  <Progress value={uploadProgress} />
+                  <Progress value={uploadProgress} className="h-2" />
                 </div>
               )}
 
@@ -573,16 +620,17 @@ export default function AuthPage() {
               )}
 
               {/* Info Alert */}
-              <Alert>
-                <AlertDescription className="text-xs">
+              <Alert className="bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-blue-400">
+                <ShieldCheck className="h-4 w-4" />
+                <AlertDescription className="text-xs ml-2">
                   Your profile will be created on the Sui blockchain. This
-                  requires a one-time transaction. Avatar images are stored on
+                  requires a one-time transaction. Avatar images are stored securely on
                   Walrus decentralized storage.
                 </AlertDescription>
               </Alert>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
                   onClick={() => setShowProfileDialog(false)}
@@ -593,7 +641,7 @@ export default function AuthPage() {
                 </Button>
                 <Button
                   onClick={handleCreateProfile}
-                  className="flex-1"
+                  className="flex-1 shadow-lg shadow-primary/20"
                   disabled={
                     isCreatingProfile ||
                     !formData.displayName.trim() ||

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
   Briefcase,
@@ -23,7 +24,9 @@ import {
   UserCircle,
   Shield,
   Star,
+  ChevronRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type UserRole = "requester" | "labeler" | "both";
 
@@ -103,6 +106,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const account = useCurrentAccount();
   const { data: profile, isLoading, isError } = useUserProfile();
   const [userRole, setUserRole] = useState<UserRole>("both");
@@ -175,113 +179,136 @@ export default function DashboardLayout({
   const getRoleBadgeColor = (role: UserRole): string => {
     switch (role) {
       case "requester":
-        return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+        return "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800";
       case "labeler":
-        return "bg-green-500/10 text-green-600 dark:text-green-400";
+        return "bg-green-500/10 text-green-600 border-green-200 dark:border-green-800";
       case "both":
-        return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+        return "bg-purple-500/10 text-purple-600 border-purple-200 dark:border-purple-800";
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-screen overflow-hidden bg-muted/10">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/40 hidden md:block">
-        <div className="flex h-full flex-col">
-          {/* User Profile Section */}
-          <div className="p-6 border-b">
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar className="h-10 w-10">
-                {profile?.avatarUrl && (
-                  <AvatarImage
-                    src={profile.avatarUrl}
-                    alt={profile.displayName || "User"}
-                    onError={(e) => {
-                      console.error(
-                        "Dashboard avatar load error:",
-                        profile.avatarUrl
-                      );
-                      e.currentTarget.style.display = "none";
-                    }}
-                    crossOrigin="anonymous"
-                  />
-                )}
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {profile?.displayName
-                    ? profile.displayName.slice(0, 2).toUpperCase()
-                    : account?.address.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {profile?.displayName ||
-                    `${account?.address.slice(0, 6)}...${account?.address.slice(
-                      -4
-                    )}`}
-                </p>
-                <p className="text-xs text-muted-foreground">Connected</p>
+      <aside className="w-72 border-r bg-background/80 backdrop-blur-xl hidden md:flex flex-col z-20 shadow-xl shadow-primary/5">
+        {/* User Profile Section */}
+        <div className="p-6 border-b border-border/50 shrink-0">
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+              {profile?.avatarUrl && (
+                <AvatarImage
+                  src={profile.avatarUrl}
+                  alt={profile.displayName || "User"}
+                  onError={(e) => {
+                    console.error(
+                      "Dashboard avatar load error:",
+                      profile.avatarUrl
+                    );
+                    e.currentTarget.style.display = "none";
+                  }}
+                  crossOrigin="anonymous"
+                />
+              )}
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                {profile?.displayName
+                  ? profile.displayName.slice(0, 2).toUpperCase()
+                  : account?.address.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold truncate">
+                {profile?.displayName ||
+                  `${account?.address.slice(0, 6)}...${account?.address.slice(
+                    -4
+                  )}`}
+              </p>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse" />
+                Connected
               </div>
             </div>
-            <div
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${getRoleBadgeColor(
-                userRole
-              )}`}
-            >
-              {getRoleLabel(userRole)}
-            </div>
           </div>
+          <div
+            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border ${getRoleBadgeColor(
+              userRole
+            )}`}
+          >
+            {getRoleLabel(userRole)}
+          </div>
+        </div>
 
-          {/* Navigation */}
-          <ScrollArea className="flex-1 py-4">
-            <nav className="space-y-1 px-3">
-              {filteredNavItems.map((item) => (
-                <Button
+        {/* Navigation - Scrollable Area */}
+        <div className="flex-1 overflow-y-auto py-4 px-4">
+          <nav className="space-y-1.5">
+            {filteredNavItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
                   key={item.href}
-                  variant="ghost"
-                  asChild
-                  className="w-full justify-start"
+                  href={item.href}
+                  className={cn(
+                    "flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
                 >
-                  <Link href={item.href}>
-                    {item.icon}
-                    <span className="ml-2">{item.title}</span>
-                  </Link>
-                </Button>
-              ))}
-            </nav>
-          </ScrollArea>
-
-          {/* Bottom Actions */}
-          <div className="p-3 border-t space-y-1">
-            {userRole === "both" && (
-              <Button variant="ghost" className="w-full justify-start" asChild>
-                <Link href="/settings">
-                  <Settings className="h-5 w-5" />
-                  <span className="ml-2">Settings</span>
+                  <div className="flex items-center">
+                    <span className={cn("mr-3 transition-colors", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")}>
+                      {item.icon}
+                    </span>
+                    {item.title}
+                  </div>
+                  {isActive && <ChevronRight className="h-4 w-4 opacity-50" />}
                 </Link>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-destructive hover:text-destructive"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="ml-2">Sign Out</span>
-            </Button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Actions - Fixed at bottom */}
+        <div className="p-4 border-t border-border/50 bg-muted/5 space-y-2 shrink-0">
+          <div className="flex items-center justify-between px-2 mb-2">
+            <span className="text-xs text-muted-foreground font-medium">Theme</span>
+            <ThemeToggle />
           </div>
+          
+          {userRole === "both" && (
+            <Button variant="ghost" className="w-full justify-start hover:bg-background" asChild>
+              <Link href="/settings">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Link>
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto relative">
+        {/* Background decoration */}
+        <div className="absolute top-0 left-0 w-full h-64 bg-linear-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
+        
+        <div className="container mx-auto p-6 md:p-8 max-w-7xl">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

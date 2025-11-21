@@ -28,6 +28,12 @@ import {
   Filter,
   TrendingUp,
   Loader2,
+  ArrowUpRight,
+  Briefcase,
+  Image as ImageIcon,
+  Type,
+  Mic,
+  Video,
 } from "lucide-react";
 import { useAvailableTasks } from "@/hooks/use-tasks";
 
@@ -65,8 +71,8 @@ export default function AvailableTasksPage() {
   const getDifficultyBadge = () => {
     // This can be determined based on bounty or other factors
     return (
-      <Badge variant="outline" className="text-blue-600">
-        Task
+      <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+        Open Task
       </Badge>
     );
   };
@@ -78,69 +84,73 @@ export default function AvailableTasksPage() {
       (parseInt(task.currentLabelers) / parseInt(task.requiredLabelers)) * 100;
 
     return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-xl mb-2">{task.title}</CardTitle>
-              <CardDescription className="line-clamp-2">
+      <Card className="glass-card hover:border-primary/50 transition-all duration-300 group h-full flex flex-col">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="secondary" className="bg-secondary/50 text-xs font-mono">
+                  #{task.taskId.slice(0, 6)}
+                </Badge>
+                {getDifficultyBadge()}
+              </div>
+              <CardTitle className="text-lg font-semibold line-clamp-1 group-hover:text-primary transition-colors">
+                {task.title}
+              </CardTitle>
+              <CardDescription className="line-clamp-2 mt-1">
                 {task.description}
               </CardDescription>
             </div>
-            {getDifficultyBadge()}
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Bounty</p>
-                  <p className="font-semibold">
-                    {(parseInt(task.bounty) / 1_000_000_000).toFixed(2)} SUI
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Deadline</p>
-                  <p className="font-semibold">
-                    {new Date(parseInt(task.deadline)).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Spots Left</p>
-                  <p className="font-semibold">{spotsRemaining}</p>
-                </div>
-              </div>
+        <CardContent className="flex-1 flex flex-col justify-between gap-4">
+          <div className="grid grid-cols-3 gap-2 text-sm bg-muted/30 p-3 rounded-lg border">
+            <div className="flex flex-col items-center text-center p-1">
+              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <DollarSign className="h-3 w-3" /> Bounty
+              </span>
+              <span className="font-bold text-primary">
+                {(parseInt(task.bounty) / 1_000_000_000).toFixed(2)} SUI
+              </span>
             </div>
+            <div className="flex flex-col items-center text-center p-1 border-x border-border/50">
+              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <Clock className="h-3 w-3" /> Deadline
+              </span>
+              <span className="font-medium">
+                {new Date(parseInt(task.deadline)).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+            <div className="flex flex-col items-center text-center p-1">
+              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <Users className="h-3 w-3" /> Spots
+              </span>
+              <span className="font-medium">{spotsRemaining} left</span>
+            </div>
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Progress</span>
                 <span className="font-medium">
-                  {task.currentLabelers}/{task.requiredLabelers} labelers
+                  {Math.round(progress)}% filled
                 </span>
               </div>
-              <div className="w-full bg-secondary rounded-full h-2">
+              <div className="w-full bg-secondary/50 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-primary rounded-full h-2 transition-all"
+                  className="bg-gradient-to-r from-primary to-purple-500 rounded-full h-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <Badge variant="secondary">Task #{task.taskId}</Badge>
-              <Button asChild>
-                <Link href={`/tasks/${task.objectId}`}>View Task</Link>
-              </Button>
-            </div>
+            <Button asChild className="w-full shadow-md shadow-primary/10 group-hover:shadow-primary/30 transition-all">
+              <Link href={`/tasks/${task.objectId}`}>
+                View Task Details
+                <ArrowUpRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -149,10 +159,9 @@ export default function AvailableTasksPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+      <div className="container mx-auto p-6 max-w-7xl min-h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading available tasks...</p>
       </div>
     );
   }
@@ -160,10 +169,17 @@ export default function AvailableTasksPage() {
   if (error) {
     return (
       <div className="container mx-auto p-6 max-w-7xl">
-        <Card>
+        <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="text-center py-12">
-            <p className="text-red-600 mb-4">Error loading tasks</p>
+            <p className="text-lg font-semibold text-destructive mb-2">Error loading tasks</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4" 
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -171,55 +187,55 @@ export default function AvailableTasksPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Available Tasks</h1>
-        <p className="text-muted-foreground mt-1">
-          Browse and claim labeling tasks to earn rewards
-        </p>
+    <div className="container mx-auto p-6 max-w-7xl space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Available Tasks</h1>
+          <p className="text-muted-foreground mt-1">
+            Browse and claim labeling tasks to earn rewards
+          </p>
+        </div>
       </div>
 
       {/* Filters and Search */}
-      <Card className="mb-6">
+      <Card className="glass-card">
         <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="grid gap-4 md:grid-cols-12">
+            <div className="md:col-span-5 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tasks by title or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-background/50"
+              />
             </div>
-            <div>
+            <div className="md:col-span-3">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
+                <SelectTrigger className="bg-background/50">
+                  <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Image">Image</SelectItem>
-                  <SelectItem value="Text">Text</SelectItem>
-                  <SelectItem value="Audio">Audio</SelectItem>
-                  <SelectItem value="Video">Video</SelectItem>
+                  <SelectItem value="Image">Image Classification</SelectItem>
+                  <SelectItem value="Text">Text Annotation</SelectItem>
+                  <SelectItem value="Audio">Audio Transcription</SelectItem>
+                  <SelectItem value="Video">Video Labeling</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="md:col-span-4">
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <TrendingUp className="h-4 w-4 mr-2" />
+                <SelectTrigger className="bg-background/50">
+                  <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bounty-high">Highest Bounty</SelectItem>
                   <SelectItem value="bounty-low">Lowest Bounty</SelectItem>
                   <SelectItem value="deadline-soon">Deadline (Soon)</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="newest">Newest Added</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -228,27 +244,49 @@ export default function AvailableTasksPage() {
       </Card>
 
       {/* Task Results */}
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}{" "}
-          available
-        </p>
-      </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" />
+            Task Listings
+          </h2>
+          <Badge variant="secondary" className="px-3 py-1">
+            {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""} found
+          </Badge>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map((task) => (
-            <TaskCard key={task.objectId} task={task} />
-          ))
-        ) : (
-          <Card className="md:col-span-2">
-            <CardContent className="text-center py-12">
-              <p className="text-muted-foreground">
-                No tasks found matching your criteria
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredTasks.length > 0 ? (
+            filteredTasks.map((task) => (
+              <TaskCard key={task.objectId} task={task} />
+            ))
+          ) : (
+            <div className="col-span-full">
+              <Card className="glass-card border-dashed">
+                <CardContent className="text-center py-16">
+                  <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No tasks found</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto">
+                    We couldn't find any tasks matching your criteria. Try adjusting your filters or search query.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-6"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilterCategory("all");
+                      setSortBy("bounty-high");
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

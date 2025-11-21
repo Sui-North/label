@@ -32,11 +32,15 @@ import {
   Loader2,
   Download,
   Users,
+  ArrowUpRight,
+  Search,
+  Filter,
 } from "lucide-react";
 import { useMySubmissions } from "@/hooks/use-submissions";
 import { useAllTasks } from "@/hooks/use-tasks";
 import { ReviewSubmissionDialog } from "@/components/review-submission-dialog";
 import { downloadFromWalrus } from "@/lib/walrus";
+import { Input } from "@/components/ui/input";
 
 export default function MySubmissionsPage() {
   const account = useCurrentAccount();
@@ -49,35 +53,46 @@ export default function MySubmissionsPage() {
     (typeof submissions)[0] | null
   >(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter submissions based on search query
+  const filteredSubmissions = submissions.filter(s => {
+    const task = allTasks.find(t => t.taskId === s.taskId);
+    const taskTitle = task?.title.toLowerCase() || "";
+    return taskTitle.includes(searchQuery.toLowerCase()) || s.submissionId.includes(searchQuery);
+  });
 
   // Group submissions by status
-  const pendingSubmissions = submissions.filter((s) => s.status === "0"); // Pending
-  const acceptedSubmissions = submissions.filter((s) => s.status === "1"); // Accepted
-  const rejectedSubmissions = submissions.filter((s) => s.status === "2"); // Rejected
+  const pendingSubmissions = filteredSubmissions.filter((s) => s.status === "0"); // Pending
+  const acceptedSubmissions = filteredSubmissions.filter((s) => s.status === "1"); // Accepted
+  const rejectedSubmissions = filteredSubmissions.filter((s) => s.status === "2"); // Rejected
 
   // Calculate total earned from accepted submissions
   // Note: bounty amount will need to be fetched from task objects
-  const totalEarned = acceptedSubmissions.length * 0; // Placeholder
+  const totalEarned = acceptedSubmissions.reduce((acc, s) => {
+    const task = allTasks.find(t => t.taskId === s.taskId);
+    return acc + (task ? parseInt(task.bounty) : 0);
+  }, 0);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "0": // Pending
         return (
-          <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+          <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-500/20">
             <Clock className="h-3 w-3 mr-1" />
             Pending Review
           </Badge>
         );
       case "1": // Accepted
         return (
-          <Badge className="bg-green-500/10 text-green-600 dark:text-green-400">
+          <Badge className="bg-green-500/10 text-green-600 border-green-200 dark:border-green-800 hover:bg-green-500/20">
             <CheckCircle className="h-3 w-3 mr-1" />
             Accepted
           </Badge>
         );
       case "2": // Rejected
         return (
-          <Badge className="bg-red-500/10 text-red-600 dark:text-red-400">
+          <Badge className="bg-red-500/10 text-red-600 border-red-200 dark:border-red-800 hover:bg-red-500/20">
             <XCircle className="h-3 w-3 mr-1" />
             Rejected
           </Badge>
@@ -96,69 +111,66 @@ export default function MySubmissionsPage() {
     const task = allTasks.find((t) => t.taskId === submission.taskId);
 
     return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-xl mb-2">
+      <Card className="glass-card bg-transparent hover:border-primary/30 transition-all duration-300 group">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                {getStatusBadge(submission.status)}
+                <span className="text-xs text-muted-foreground font-mono">ID: {submission.submissionId.slice(0, 8)}</span>
+              </div>
+              <CardTitle className="text-lg font-semibold truncate group-hover:text-primary transition-colors">
                 {task?.title || "Unknown Task"}
               </CardTitle>
-              <CardDescription>
-                Submission ID: {submission.submissionId}
+              <CardDescription className="line-clamp-1 mt-1">
+                Submitted on {new Date(parseInt(submission.submittedAt)).toLocaleDateString()}
               </CardDescription>
             </div>
-            {getStatusBadge(submission.status)}
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              {task && (
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-muted-foreground text-xs">Bounty</p>
-                    <p className="font-semibold">
-                      {(parseInt(task.bounty) / 1_000_000_000).toFixed(2)} SUI
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-muted-foreground text-xs">Submitted</p>
-                  <p className="font-semibold">
-                    {new Date(
-                      parseInt(submission.submittedAt)
-                    ).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-4 py-4 border-y border-border/50 bg-muted/20 rounded-lg px-4 mb-4">
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <DollarSign className="h-3 w-3" /> Potential Bounty
+              </span>
+              <span className="font-semibold text-sm text-primary">
+                {task ? (parseInt(task.bounty) / 1_000_000_000).toFixed(2) : "0.00"} SUI
+              </span>
             </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                <Calendar className="h-3 w-3" /> Submitted
+              </span>
+              <span className="font-semibold text-sm">
+                {new Date(parseInt(submission.submittedAt)).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
 
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedTask(task ?? null)}
-                disabled={!task}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                View Task
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setViewSubmission(submission);
-                  setViewDialogOpen(true);
-                }}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                View Submission
-              </Button>
-            </div>
+          <div className="flex gap-2 relative z-10">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 bg-transparent border-primary/20 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
+              onClick={() => setSelectedTask(task ?? null)}
+              disabled={!task}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Task Details
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 bg-transparent border-primary/20 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
+              onClick={() => {
+                setViewSubmission(submission);
+                setViewDialogOpen(true);
+              }}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              View Submission
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -167,10 +179,9 @@ export default function MySubmissionsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+      <div className="container mx-auto p-6 max-w-7xl min-h-[60vh] flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading your submissions...</p>
       </div>
     );
   }
@@ -178,10 +189,18 @@ export default function MySubmissionsPage() {
   if (error) {
     return (
       <div className="container mx-auto p-6 max-w-7xl">
-        <Card>
+        <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="text-center py-12">
-            <p className="text-red-600 mb-4">Error loading submissions</p>
+            <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <p className="text-lg font-semibold text-destructive mb-2">Error loading submissions</p>
             <p className="text-sm text-muted-foreground">{error.message}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4" 
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -189,91 +208,142 @@ export default function MySubmissionsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">My Submissions</h1>
-        <p className="text-muted-foreground mt-1">
-          Track your labeling submissions and earnings
-        </p>
+    <div className="container mx-auto p-6 max-w-7xl space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">My Submissions</h1>
+          <p className="text-muted-foreground mt-1">
+            Track your labeling submissions and earnings
+          </p>
+        </div>
+        <Button asChild variant="outline" className="shadow-sm">
+          <Link href="/dashboard/available">
+            <ArrowUpRight className="h-4 w-4 mr-2" />
+            Browse More Tasks
+          </Link>
+        </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="pb-3">
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Submissions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{submissions.length}</p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold">{submissions.length}</p>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 border-green-500/20 bg-green-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-green-600/80">
               Accepted
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-green-600">
-              {acceptedSubmissions.length}
-            </p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold text-green-600">
+                {acceptedSubmissions.length}
+              </p>
+              <CheckCircle className="h-4 w-4 text-green-600/50" />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 border-yellow-500/20 bg-yellow-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-yellow-600/80">
+              Pending Review
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-yellow-600">
-              {pendingSubmissions.length}
-            </p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold text-yellow-600">
+                {pendingSubmissions.length}
+              </p>
+              <Clock className="h-4 w-4 text-yellow-600/50" />
+            </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-primary">
               Total Earned
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{totalEarned.toFixed(2)} SUI</p>
+            <div className="flex items-baseline justify-between">
+              <p className="text-3xl font-bold text-primary">{(totalEarned / 1_000_000_000).toFixed(2)} SUI</p>
+              <DollarSign className="h-4 w-4 text-primary/50" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-muted/30 p-4 rounded-xl border">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search submissions..." 
+            className="pl-9 bg-background/50"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Button variant="outline" size="icon" className="shrink-0">
+            <Filter className="h-4 w-4" />
+          </Button>
+          <div className="text-sm text-muted-foreground whitespace-nowrap">
+            Showing {filteredSubmissions.length} submissions
+          </div>
+        </div>
+      </div>
+
       {/* Submissions List */}
       <Tabs defaultValue="all" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="all">All ({submissions.length})</TabsTrigger>
-          <TabsTrigger value="pending">
-            Pending ({pendingSubmissions.length})
+        <TabsList className="bg-muted/50 p-1 rounded-xl">
+          <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            All <Badge variant="secondary" className="ml-2 h-5 px-1.5">{submissions.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="accepted">
-            Accepted ({acceptedSubmissions.length})
+          <TabsTrigger value="pending" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Pending <Badge variant="secondary" className="ml-2 h-5 px-1.5">{pendingSubmissions.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rejected ({rejectedSubmissions.length})
+          <TabsTrigger value="accepted" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Accepted <Badge variant="secondary" className="ml-2 h-5 px-1.5">{acceptedSubmissions.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="rejected" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            Rejected <Badge variant="secondary" className="ml-2 h-5 px-1.5">{rejectedSubmissions.length}</Badge>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="all" className="space-y-4">
-          {submissions.length > 0 ? (
-            submissions.map((submission) => (
-              <SubmissionCard
-                key={submission.submissionId}
-                submission={submission}
-              />
-            ))
+        <TabsContent value="all" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {filteredSubmissions.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredSubmissions.map((submission) => (
+                <SubmissionCard
+                  key={submission.submissionId}
+                  submission={submission}
+                />
+              ))}
+            </div>
           ) : (
-            <Card>
-              <CardContent className="text-center py-12">
-                <p className="text-muted-foreground mb-4">No submissions yet</p>
+            <Card className="glass-card border-dashed">
+              <CardContent className="text-center py-16">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No submissions found</h3>
+                <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                  You haven't made any submissions matching your criteria yet.
+                </p>
                 <Button asChild>
                   <Link href="/dashboard/available">
+                    <ArrowUpRight className="h-4 w-4 mr-2" />
                     Browse Available Tasks
                   </Link>
                 </Button>
@@ -282,54 +352,76 @@ export default function MySubmissionsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="pending" className="space-y-4">
+        <TabsContent value="pending" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {pendingSubmissions.length > 0 ? (
-            pendingSubmissions.map((submission) => (
-              <SubmissionCard
-                key={submission.submissionId}
-                submission={submission}
-              />
-            ))
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {pendingSubmissions.map((submission) => (
+                <SubmissionCard
+                  key={submission.submissionId}
+                  submission={submission}
+                />
+              ))}
+            </div>
           ) : (
-            <Card>
-              <CardContent className="text-center py-12">
-                <p className="text-muted-foreground">No pending submissions</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="accepted" className="space-y-4">
-          {acceptedSubmissions.length > 0 ? (
-            acceptedSubmissions.map((submission) => (
-              <SubmissionCard
-                key={submission.submissionId}
-                submission={submission}
-              />
-            ))
-          ) : (
-            <Card>
-              <CardContent className="text-center py-12">
+            <Card className="glass-card border-dashed">
+              <CardContent className="text-center py-16">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No pending submissions</h3>
                 <p className="text-muted-foreground">
-                  No accepted submissions yet
+                  All your submissions have been reviewed.
                 </p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="rejected" className="space-y-4">
-          {rejectedSubmissions.length > 0 ? (
-            rejectedSubmissions.map((submission) => (
-              <SubmissionCard
-                key={submission.submissionId}
-                submission={submission}
-              />
-            ))
+        <TabsContent value="accepted" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {acceptedSubmissions.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {acceptedSubmissions.map((submission) => (
+                <SubmissionCard
+                  key={submission.submissionId}
+                  submission={submission}
+                />
+              ))}
+            </div>
           ) : (
-            <Card>
-              <CardContent className="text-center py-12">
-                <p className="text-muted-foreground">No rejected submissions</p>
+            <Card className="glass-card border-dashed">
+              <CardContent className="text-center py-16">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No accepted submissions</h3>
+                <p className="text-muted-foreground">
+                  Keep working! Your accepted submissions will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="rejected" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {rejectedSubmissions.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {rejectedSubmissions.map((submission) => (
+                <SubmissionCard
+                  key={submission.submissionId}
+                  submission={submission}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="glass-card border-dashed">
+              <CardContent className="text-center py-16">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <XCircle className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No rejected submissions</h3>
+                <p className="text-muted-foreground">
+                  Great job! You have no rejected submissions.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -341,21 +433,23 @@ export default function MySubmissionsPage() {
         open={!!selectedTask}
         onOpenChange={(open) => !open && setSelectedTask(null)}
       >
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto glass-card border-primary/20">
           <DialogHeader>
-            <DialogTitle>{selectedTask?.title}</DialogTitle>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">{selectedTask?.title}</DialogTitle>
             <DialogDescription>Task Details</DialogDescription>
           </DialogHeader>
 
           {selectedTask && (
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               {/* Task Info Grid */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-xl border">
                 <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <DollarSign className="h-5 w-5" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Bounty</p>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-primary">
                       {(parseInt(selectedTask.bounty) / 1_000_000_000).toFixed(
                         2
                       )}{" "}
@@ -365,7 +459,9 @@ export default function MySubmissionsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Calendar className="h-5 w-5" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Deadline</p>
                     <p className="font-semibold">
@@ -377,7 +473,9 @@ export default function MySubmissionsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Users className="h-5 w-5" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Progress</p>
                     <p className="font-semibold">
@@ -388,7 +486,9 @@ export default function MySubmissionsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <FileText className="h-5 w-5" />
+                  </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Status</p>
                     <p className="font-semibold capitalize">
@@ -406,32 +506,40 @@ export default function MySubmissionsPage() {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               {/* Description */}
               <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  Description
+                </h3>
+                <div className="bg-muted/20 p-4 rounded-lg text-sm text-muted-foreground whitespace-pre-wrap border">
                   {selectedTask.description}
-                </p>
+                </div>
               </div>
 
               {/* Instructions */}
               <div>
-                <h3 className="font-semibold mb-2">Instructions</h3>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  Instructions
+                </h3>
+                <div className="bg-muted/20 p-4 rounded-lg text-sm text-muted-foreground whitespace-pre-wrap border">
                   {selectedTask.instructions}
-                </p>
+                </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               {/* Dataset */}
               <div>
                 <h3 className="font-semibold mb-2">Dataset</h3>
-                <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <FileText className="h-5 w-5" />
+                    </div>
                     <div>
                       <p className="text-sm font-medium">
                         {selectedTask.datasetFilename}
@@ -444,6 +552,7 @@ export default function MySubmissionsPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="hover:bg-primary hover:text-primary-foreground"
                     onClick={() =>
                       downloadFromWalrus(
                         selectedTask.datasetUrl,

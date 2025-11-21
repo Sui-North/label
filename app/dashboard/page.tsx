@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Card,
   CardContent,
@@ -39,15 +40,12 @@ import {
   AreaChart,
   Bar,
   BarChart,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   Cell,
   XAxis,
   YAxis,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -60,6 +58,12 @@ function DashboardContent() {
     useAllSubmissions();
 
   const isLoading = tasksLoading || submissionsLoading || profileLoading;
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Determine user role from profile (1=requester, 2=labeler, 3=both)
   const userRole = profile?.userType || 3; // Default to "both"
@@ -224,23 +228,43 @@ function DashboardContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back{profile?.displayName ? `, ${profile.displayName}` : ""}!
-          {userRole === 1 &&
-            " Manage your labeling tasks and track your project progress."}
-          {userRole === 2 && " Browse available tasks and track your earnings."}
-          {userRole === 3 &&
-            " Manage your tasks and submissions on the blockchain."}
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Welcome back{profile?.displayName ? `, ${profile.displayName}` : ""}!
+            {userRole === 1 &&
+              " Manage your labeling tasks and track your project progress."}
+            {userRole === 2 && " Browse available tasks and track your earnings."}
+            {userRole === 3 &&
+              " Manage your tasks and submissions on the blockchain."}
+          </p>
+        </div>
+        <div className="flex gap-2">
+           {showRequesterStats && (
+             <Button asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
+              <Link href="/dashboard/create-task">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Task
+              </Link>
+            </Button>
+           )}
+           {showLabelerStats && (
+             <Button asChild variant="outline" className="hover:bg-accent">
+              <Link href="/dashboard/available">
+                <Briefcase className="h-4 w-4 mr-2" />
+                Find Work
+              </Link>
+            </Button>
+           )}
+        </div>
       </div>
 
       {/* Activity Timeline Chart */}
       {(showRequesterStats || showLabelerStats) && activityData.length > 0 && (
-        <Card>
+        <Card className="glass-card border-primary/10 overflow-hidden">
           <CardHeader>
             <CardTitle>Activity Timeline</CardTitle>
             <CardDescription>
@@ -261,7 +285,7 @@ function DashboardContent() {
               }}
               className="h-[300px] w-full"
             >
-              <AreaChart data={activityData}>
+              <AreaChart key={theme} data={activityData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="fillTasks" x1="0" y1="0" x2="0" y2="1">
                     <stop
@@ -272,7 +296,7 @@ function DashboardContent() {
                     <stop
                       offset="95%"
                       stopColor="hsl(var(--chart-1))"
-                      stopOpacity={0.1}
+                      stopOpacity={0.3}
                     />
                   </linearGradient>
                   <linearGradient
@@ -290,21 +314,25 @@ function DashboardContent() {
                     <stop
                       offset="95%"
                       stopColor="hsl(var(--chart-2))"
-                      stopOpacity={0.1}
+                      stopOpacity={0.3}
                     />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted-foreground/20" vertical={false} />
                 <XAxis
                   dataKey="date"
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  tickLine={{ stroke: "hsl(var(--muted-foreground))" }}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
                 />
                 <YAxis
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
-                  tickLine={{ stroke: "hsl(var(--muted-foreground))" }}
+                  tickLine={false}
+                  axisLine={false}
+                  dx={-10}
                 />
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
                 {showRequesterStats && (
                   <Area
                     type="monotone"
@@ -312,7 +340,8 @@ function DashboardContent() {
                     stroke="hsl(var(--chart-1))"
                     fillOpacity={1}
                     fill="url(#fillTasks)"
-                    strokeWidth={2}
+                    strokeWidth={3}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 )}
                 {showLabelerStats && (
@@ -322,7 +351,8 @@ function DashboardContent() {
                     stroke="hsl(var(--chart-2))"
                     fillOpacity={1}
                     fill="url(#fillSubmissions)"
-                    strokeWidth={2}
+                    strokeWidth={3}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 )}
               </AreaChart>
@@ -334,79 +364,66 @@ function DashboardContent() {
       {/* Requester Stats */}
       {showRequesterStats && requesterStats && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">Task Management</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Manage and track your labeling tasks
-              </p>
-            </div>
-            <Button asChild>
-              <Link href="/dashboard/create-task">
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Task
-              </Link>
-            </Button>
+          <div className="flex items-center gap-2">
+             <div className="h-8 w-1 bg-blue-500 rounded-full" />
+             <h2 className="text-xl font-semibold">Requester Overview</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-l-4 border-l-blue-500">
+            <Card className="glass-card hover:border-blue-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-blue-500 transition-colors">
                   Active Tasks
                 </CardTitle>
-                <Clock className="h-4 w-4 text-blue-500" />
+                <div className="p-2 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {requesterStats.activeTasks}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Currently in progress
-                </p>
                 <div className="mt-2 flex items-center text-xs">
-                  <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                  <span className="text-green-600">Live on blockchain</span>
+                  <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                  <span className="text-green-500 font-medium">Live on blockchain</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-green-500">
+            <Card className="glass-card hover:border-green-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-green-500 transition-colors">
                   Completed Tasks
                 </CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <div className="p-2 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition-colors">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {requesterStats.completedTasks}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Successfully finished
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   <span className="text-muted-foreground">
-                    {requesterStats.myTasks.length} total tasks
+                    {requesterStats.myTasks.length} total created
                   </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-purple-500">
+            <Card className="glass-card hover:border-purple-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-purple-500 transition-colors">
                   Total Spent
                 </CardTitle>
-                <DollarSign className="h-4 w-4 text-purple-500" />
+                <div className="p-2 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
+                  <DollarSign className="h-4 w-4 text-purple-500" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-600">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {requesterStats.totalSpent}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  SUI on all tasks
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   <span className="text-muted-foreground">
                     ≈ $
@@ -417,30 +434,29 @@ function DashboardContent() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-orange-500">
+            <Card className="glass-card hover:border-orange-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-500 transition-colors">
                   Avg Quality
                 </CardTitle>
-                <TrendingUp className="h-4 w-4 text-orange-500" />
+                <div className="p-2 bg-orange-500/10 rounded-full group-hover:bg-orange-500/20 transition-colors">
+                  <TrendingUp className="h-4 w-4 text-orange-500" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {requesterStats.avgQuality}%
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Submission acceptance rate
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   {requesterStats.avgQuality >= 80 ? (
                     <>
-                      <ArrowUpRight className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-green-600">Excellent</span>
+                      <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                      <span className="text-green-500 font-medium">Excellent</span>
                     </>
                   ) : (
                     <>
-                      <ArrowDownRight className="h-3 w-3 text-orange-600 mr-1" />
-                      <span className="text-orange-600">Needs improvement</span>
+                      <ArrowDownRight className="h-3 w-3 text-orange-500 mr-1" />
+                      <span className="text-orange-500 font-medium">Needs improvement</span>
                     </>
                   )}
                 </div>
@@ -452,7 +468,7 @@ function DashboardContent() {
           <div className="grid gap-6 md:grid-cols-2">
             {/* Task Status Distribution */}
             {taskStatusData.length > 0 && (
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>Task Status Distribution</CardTitle>
                   <CardDescription>
@@ -475,23 +491,40 @@ function DashboardContent() {
                     }}
                     className="h-[250px] w-full"
                   >
-                    <PieChart>
+                    <PieChart key={theme}>
                       <Pie
                         data={taskStatusData}
                         cx="50%"
                         cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) =>
-                          `${name} ${(percent * 100).toFixed(0)}%`
-                        }
+                        innerRadius={60}
                         outerRadius={80}
+                        paddingAngle={5}
                         dataKey="value"
                       >
                         {taskStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                          <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
                         ))}
                       </Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                      <text
+                        x="50%"
+                        y="50%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-foreground text-2xl font-bold"
+                      >
+                        {requesterStats.myTasks.length}
+                      </text>
+                      <text
+                        x="50%"
+                        y="50%"
+                        dy={20}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-muted-foreground text-xs"
+                      >
+                        Tasks
+                      </text>
                     </PieChart>
                   </ChartContainer>
                 </CardContent>
@@ -499,22 +532,22 @@ function DashboardContent() {
             )}
 
             {/* Recent Tasks */}
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Recent Tasks</CardTitle>
                 <CardDescription>Your latest created tasks</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {requesterStats.recentTasks.length > 0 ? (
                     requesterStats.recentTasks.map((task) => (
                       <div
                         key={task.objectId}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        className="flex items-center justify-between p-4 rounded-xl border bg-background/50 hover:bg-accent/50 transition-all hover:shadow-md group"
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{task.title}</p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <p className="font-medium truncate group-hover:text-primary transition-colors">{task.title}</p>
+                          <div className="flex items-center gap-2 mt-1.5">
                             <Badge
                               variant={
                                 task.status === "0" || task.status === "1"
@@ -523,7 +556,7 @@ function DashboardContent() {
                                   ? "secondary"
                                   : "destructive"
                               }
-                              className="text-xs"
+                              className="text-[10px] px-2 py-0.5 h-5"
                             >
                               {task.status === "0"
                                 ? "Open"
@@ -533,13 +566,13 @@ function DashboardContent() {
                                 ? "Completed"
                                 : "Cancelled"}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground font-mono">
                               {(Number(task.bounty) / 1_000_000_000).toFixed(2)}{" "}
                               SUI
                             </span>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" asChild>
                           <Link href={`/tasks/${task.objectId}`}>
                             <ArrowUpRight className="h-4 w-4" />
                           </Link>
@@ -547,10 +580,10 @@ function DashboardContent() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Target className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed">
+                      <Target className="h-12 w-12 mx-auto mb-3 opacity-20" />
                       <p>No tasks created yet</p>
-                      <Button asChild className="mt-3" size="sm">
+                      <Button asChild className="mt-4" size="sm" variant="outline">
                         <Link href="/dashboard/create-task">
                           Create Your First Task
                         </Link>
@@ -567,36 +600,25 @@ function DashboardContent() {
       {/* Labeler Stats */}
       {showLabelerStats && labelerStats && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">Labeling Activity</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Track your submissions and earnings
-              </p>
-            </div>
-            <Button asChild variant="outline">
-              <Link href="/dashboard/available">
-                <Briefcase className="h-4 w-4 mr-2" />
-                Browse Available Tasks
-              </Link>
-            </Button>
+          <div className="flex items-center gap-2">
+             <div className="h-8 w-1 bg-green-500 rounded-full" />
+             <h2 className="text-xl font-semibold">Labeler Overview</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-l-4 border-l-green-500">
+            <Card className="glass-card hover:border-green-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-green-500 transition-colors">
                   Tasks Completed
                 </CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <div className="p-2 bg-green-500/10 rounded-full group-hover:bg-green-500/20 transition-colors">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {labelerStats.tasksCompleted}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Accepted submissions
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   <span className="text-muted-foreground">
                     {labelerStats.mySubmissions.length} total submissions
@@ -605,40 +627,38 @@ function DashboardContent() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-yellow-500">
+            <Card className="glass-card hover:border-yellow-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-yellow-500 transition-colors">
                   Pending Review
                 </CardTitle>
-                <Clock className="h-4 w-4 text-yellow-500" />
+                <div className="p-2 bg-yellow-500/10 rounded-full group-hover:bg-yellow-500/20 transition-colors">
+                  <Clock className="h-4 w-4 text-yellow-500" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
                   {labelerStats.pendingSubmissions}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Awaiting approval
-                </p>
                 <div className="mt-2 flex items-center text-xs">
-                  <span className="text-yellow-600">Under review</span>
+                  <span className="text-yellow-600 dark:text-yellow-500 font-medium">Under review</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-blue-500">
+            <Card className="glass-card hover:border-blue-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-blue-500 transition-colors">
                   Total Earned
                 </CardTitle>
-                <DollarSign className="h-4 w-4 text-blue-500" />
+                <div className="p-2 bg-blue-500/10 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                  <DollarSign className="h-4 w-4 text-blue-500" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                   {labelerStats.totalEarned}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  SUI from tasks
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   <span className="text-muted-foreground">
                     ≈ ${(parseFloat(labelerStats.totalEarned) * 2.5).toFixed(2)}{" "}
@@ -648,25 +668,24 @@ function DashboardContent() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-purple-500">
+            <Card className="glass-card hover:border-purple-500/50 transition-all duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-purple-500 transition-colors">
                   Reputation
                 </CardTitle>
-                <Award className="h-4 w-4 text-purple-500" />
+                <div className="p-2 bg-purple-500/10 rounded-full group-hover:bg-purple-500/20 transition-colors">
+                  <Award className="h-4 w-4 text-purple-500" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-600">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {labelerStats.reputationScore}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Score • {labelerStats.accuracy}% accuracy
-                </p>
                 <div className="mt-2 flex items-center text-xs">
                   {labelerStats.accuracy >= 80 ? (
                     <>
-                      <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-                      <span className="text-green-600">High quality</span>
+                      <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                      <span className="text-green-500 font-medium">High quality</span>
                     </>
                   ) : (
                     <span className="text-muted-foreground">
@@ -682,7 +701,7 @@ function DashboardContent() {
           <div className="grid gap-6 md:grid-cols-2">
             {/* Submission Status Distribution */}
             {submissionStatusData.length > 0 && (
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>Submission Status</CardTitle>
                   <CardDescription>
@@ -707,21 +726,26 @@ function DashboardContent() {
                     }}
                     className="h-[250px] w-full"
                   >
-                    <BarChart data={submissionStatusData}>
+                    <BarChart key={theme} data={submissionStatusData}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        className="stroke-muted"
+                        className="stroke-muted/20"
+                        vertical={false}
                       />
                       <XAxis
                         dataKey="name"
                         tick={{ fill: "hsl(var(--muted-foreground))" }}
-                        tickLine={{ stroke: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                        dy={10}
                       />
                       <YAxis
                         tick={{ fill: "hsl(var(--muted-foreground))" }}
-                        tickLine={{ stroke: "hsl(var(--muted-foreground))" }}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-10}
                       />
-                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <ChartTooltip content={<ChartTooltipContent cursor={{fill: 'transparent'}} />} />
                       <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                         {submissionStatusData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -734,7 +758,7 @@ function DashboardContent() {
             )}
 
             {/* Recent Submissions */}
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Recent Submissions</CardTitle>
                 <CardDescription>
@@ -742,7 +766,7 @@ function DashboardContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {labelerStats.recentSubmissions.length > 0 ? (
                     labelerStats.recentSubmissions.map((submission) => {
                       const task = tasks?.find(
@@ -751,13 +775,13 @@ function DashboardContent() {
                       return (
                         <div
                           key={submission.submissionId}
-                          className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                          className="flex items-center justify-between p-4 rounded-xl border bg-background/50 hover:bg-accent/50 transition-all hover:shadow-md group"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">
+                            <p className="font-medium truncate group-hover:text-primary transition-colors">
                               {task?.title || "Unknown Task"}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1.5">
                               <Badge
                                 variant={
                                   submission.status === "0"
@@ -766,7 +790,7 @@ function DashboardContent() {
                                     ? "default"
                                     : "destructive"
                                 }
-                                className="text-xs"
+                                className="text-[10px] px-2 py-0.5 h-5"
                               >
                                 {submission.status === "0"
                                   ? "Pending"
@@ -775,7 +799,7 @@ function DashboardContent() {
                                   : "Rejected"}
                               </Badge>
                               {task && (
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-muted-foreground font-mono">
                                   {(
                                     Number(task.bounty) /
                                     Number(task.requiredLabelers) /
@@ -786,7 +810,7 @@ function DashboardContent() {
                               )}
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" asChild>
                             <Link href={`/tasks/${submission.objectId}`}>
                               <ArrowUpRight className="h-4 w-4" />
                             </Link>
@@ -795,14 +819,9 @@ function DashboardContent() {
                       );
                     })
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-xl border border-dashed">
+                      <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-20" />
                       <p>No submissions yet</p>
-                      <Button asChild className="mt-3" size="sm">
-                        <Link href="/dashboard/available">
-                          Browse Available Tasks
-                        </Link>
-                      </Button>
                     </div>
                   )}
                 </div>
@@ -811,26 +830,19 @@ function DashboardContent() {
           </div>
         </div>
       )}
-
-      {/* Empty State */}
-      {!requesterStats && !labelerStats && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Data Available</h3>
-            <p className="text-muted-foreground mb-4">
-              Connect your wallet to view your dashboard statistics
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

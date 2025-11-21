@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { useAllTasks } from "@/hooks/use-tasks";
 import { useAllSubmissions } from "@/hooks/use-submissions";
+import { CursorCanvas } from "@/components/cursor-effects/cursor-canvas";
+import { SectionTrigger } from "@/components/cursor-effects/section-trigger";
 
 export default function HomePage() {
   const { data: tasks, isLoading: tasksLoading } = useAllTasks();
@@ -43,15 +45,19 @@ export default function HomePage() {
 
   return (
     <>
+      <CursorCanvas />
       <Navbar />
       <div className="relative overflow-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full pointer-events-none -z-10 opacity-50" />
         
         {/* Hero Section */}
-        <HeroSection />
+        <SectionTrigger effect="hero">
+          <HeroSection />
+        </SectionTrigger>
 
         {/* Features Section */}
+        <SectionTrigger effect="features">
         <section className="py-24 relative">
           <div className="container px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-2xl text-center mb-16">
@@ -144,8 +150,10 @@ export default function HomePage() {
             </StaggerContainer>
           </div>
         </section>
+        </SectionTrigger>
 
         {/* How It Works - Requesters */}
+        <SectionTrigger effect="default">
         <section className="py-24 relative bg-muted/30">
           <div className="container px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-6xl">
@@ -207,8 +215,10 @@ export default function HomePage() {
             </FadeIn>
           </div>
         </section>
+        </SectionTrigger>
 
         {/* Stats Section */}
+        <SectionTrigger effect="stats">
         <section className="py-20 relative overflow-hidden">
            <div className="absolute inset-0 bg-primary/5" />
            <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
@@ -252,8 +262,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </SectionTrigger>
 
         {/* CTA Section */}
+        <SectionTrigger effect="cta">
         <section className="py-24 relative overflow-hidden">
           <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
             <FadeIn>
@@ -293,6 +305,7 @@ export default function HomePage() {
             </FadeIn>
           </div>
         </section>
+        </SectionTrigger>
 
         {/* Footer */}
         <footer className="border-t py-12 bg-muted/30">

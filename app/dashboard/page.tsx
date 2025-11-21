@@ -138,6 +138,21 @@ function DashboardContent() {
     };
   }, [submissions, tasks, account]);
 
+  // Define chart colors based on theme
+  const chartColors = useMemo(() => {
+    const isDark = theme === "dark";
+    return {
+      // Light mode: Darkish gradients (Deep Blue, Purple, Indigo, Slate)
+      // Dark mode: Lightish colors (Cyan, Pink, Lime, Orange)
+      primary: isDark ? "#22d3ee" : "#1e3a8a", // Cyan-400 vs Blue-900
+      secondary: isDark ? "#f472b6" : "#4c1d95", // Pink-400 vs Violet-900
+      tertiary: isDark ? "#a3e635" : "#0f172a", // Lime-400 vs Slate-900
+      quaternary: isDark ? "#fb923c" : "#3730a3", // Orange-400 vs Indigo-800
+      quinary: isDark ? "#c084fc" : "#115e59", // Purple-400 vs Teal-800
+      senary: isDark ? "#f87171" : "#9f1239", // Red-400 vs Rose-800
+    };
+  }, [theme]);
+
   // Prepare chart data
   const taskStatusData = useMemo(() => {
     if (!requesterStats?.myTasks) return [];
@@ -155,12 +170,12 @@ function DashboardContent() {
     ).length;
 
     return [
-      { name: "Open", value: open, fill: "hsl(var(--chart-1))" },
-      { name: "In Progress", value: inProgress, fill: "hsl(var(--chart-2))" },
-      { name: "Completed", value: completed, fill: "hsl(var(--chart-3))" },
-      { name: "Cancelled", value: cancelled, fill: "hsl(var(--chart-4))" },
+      { name: "Open", value: open, fill: chartColors.primary },
+      { name: "In Progress", value: inProgress, fill: chartColors.secondary },
+      { name: "Completed", value: completed, fill: chartColors.tertiary },
+      { name: "Cancelled", value: cancelled, fill: chartColors.quaternary },
     ].filter((item) => item.value > 0);
-  }, [requesterStats]);
+  }, [requesterStats, chartColors]);
 
   const submissionStatusData = useMemo(() => {
     if (!labelerStats?.mySubmissions) return [];
@@ -175,11 +190,11 @@ function DashboardContent() {
     ).length;
 
     return [
-      { name: "Pending", value: pending, fill: "hsl(var(--chart-4))" },
-      { name: "Accepted", value: accepted, fill: "hsl(var(--chart-5))" },
-      { name: "Rejected", value: rejected, fill: "hsl(var(--chart-6))" },
+      { name: "Pending", value: pending, fill: chartColors.quaternary },
+      { name: "Accepted", value: accepted, fill: chartColors.quinary },
+      { name: "Rejected", value: rejected, fill: chartColors.senary },
     ].filter((item) => item.value > 0);
-  }, [labelerStats]);
+  }, [labelerStats, chartColors]);
 
   // Activity timeline data (last 7 days)
   const activityData = useMemo(() => {
@@ -280,7 +295,7 @@ function DashboardContent() {
                 },
                 submissions: {
                   label: "Submissions Made",
-                  color: "hsl(var(--chart-2))",
+                  color: chartColors.secondary,
                 },
               }}
               className="h-[300px] w-full"
@@ -290,13 +305,13 @@ function DashboardContent() {
                   <linearGradient id="fillTasks" x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset="5%"
-                      stopColor="hsl(var(--chart-1))"
+                      stopColor={chartColors.primary}
                       stopOpacity={0.8}
                     />
                     <stop
                       offset="95%"
-                      stopColor="hsl(var(--chart-1))"
-                      stopOpacity={0.3}
+                      stopColor={chartColors.primary}
+                      stopOpacity={0.1}
                     />
                   </linearGradient>
                   <linearGradient
@@ -308,13 +323,13 @@ function DashboardContent() {
                   >
                     <stop
                       offset="5%"
-                      stopColor="hsl(var(--chart-2))"
+                      stopColor={chartColors.secondary}
                       stopOpacity={0.8}
                     />
                     <stop
                       offset="95%"
-                      stopColor="hsl(var(--chart-2))"
-                      stopOpacity={0.3}
+                      stopColor={chartColors.secondary}
+                      stopOpacity={0.1}
                     />
                   </linearGradient>
                 </defs>
@@ -337,7 +352,7 @@ function DashboardContent() {
                   <Area
                     type="monotone"
                     dataKey="tasks"
-                    stroke="hsl(var(--chart-1))"
+                    stroke={chartColors.primary}
                     fillOpacity={1}
                     fill="url(#fillTasks)"
                     strokeWidth={3}
@@ -348,7 +363,7 @@ function DashboardContent() {
                   <Area
                     type="monotone"
                     dataKey="submissions"
-                    stroke="hsl(var(--chart-2))"
+                    stroke={chartColors.secondary}
                     fillOpacity={1}
                     fill="url(#fillSubmissions)"
                     strokeWidth={3}
@@ -478,15 +493,15 @@ function DashboardContent() {
                 <CardContent>
                   <ChartContainer
                     config={{
-                      open: { label: "Open", color: "hsl(var(--chart-1))" },
-                      inProgress: { label: "In Progress", color: "hsl(var(--chart-2))" },
+                      open: { label: "Open", color: chartColors.primary },
+                      inProgress: { label: "In Progress", color: chartColors.secondary },
                       completed: {
                         label: "Completed",
-                        color: "hsl(var(--chart-3))",
+                        color: chartColors.tertiary,
                       },
                       cancelled: {
                         label: "Cancelled",
-                        color: "hsl(var(--chart-4))",
+                        color: chartColors.quaternary,
                       },
                     }}
                     className="h-[250px] w-full"
@@ -713,15 +728,15 @@ function DashboardContent() {
                     config={{
                       pending: {
                         label: "Pending",
-                        color: "hsl(var(--chart-4))",
+                        color: chartColors.quaternary,
                       },
                       accepted: {
                         label: "Accepted",
-                        color: "hsl(var(--chart-5))",
+                        color: chartColors.quinary,
                       },
                       rejected: {
                         label: "Rejected",
-                        color: "hsl(var(--chart-6))",
+                        color: chartColors.senary,
                       },
                     }}
                     className="h-[250px] w-full"

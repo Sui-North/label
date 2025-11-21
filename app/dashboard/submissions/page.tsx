@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -111,58 +112,55 @@ export default function MySubmissionsPage() {
     const task = allTasks.find((t) => t.taskId === submission.taskId);
 
     return (
-      <Card className="glass-card bg-transparent hover:border-primary/30 transition-all duration-300 group">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                {getStatusBadge(submission.status)}
-                <span className="text-xs text-muted-foreground font-mono">ID: {submission.submissionId.slice(0, 8)}</span>
-              </div>
-              <CardTitle className="text-lg font-semibold truncate group-hover:text-primary transition-colors">
-                {task?.title || "Unknown Task"}
-              </CardTitle>
-              <CardDescription className="line-clamp-1 mt-1">
-                Submitted on {new Date(parseInt(submission.submittedAt)).toLocaleDateString()}
-              </CardDescription>
-            </div>
+      <Card className="glass-card h-full hover:border-primary/50 hover:shadow-primary/10 transition-all duration-300 group flex flex-col overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 to-purple-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+        
+        <CardHeader className="pb-2 space-y-4">
+          <div className="flex items-center justify-between">
+            {getStatusBadge(submission.status)}
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded-full">
+              ID: {submission.submissionId.slice(0, 8)}
+            </span>
+          </div>
+          
+          <div className="space-y-1">
+            <CardTitle className="text-xl font-bold truncate group-hover:text-primary transition-colors">
+              {task?.title || "Unknown Task"}
+            </CardTitle>
+            <CardDescription className="flex items-center gap-2 text-xs">
+              <Clock className="h-3 w-3" />
+              Submitted {new Date(parseInt(submission.submittedAt)).toLocaleDateString()}
+            </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 py-4 border-y border-border/50 bg-muted/20 rounded-lg px-4 mb-4">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                <DollarSign className="h-3 w-3" /> Potential Bounty
+
+        <CardContent className="pb-4 flex-1">
+          <div className="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-xl border border-border/50 group-hover:border-primary/20 transition-colors">
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <DollarSign className="h-3 w-3 text-primary" /> 
+                Bounty
               </span>
-              <span className="font-semibold text-sm text-primary">
+              <p className="font-bold text-primary">
                 {task ? (parseInt(task.bounty) / 1_000_000_000).toFixed(2) : "0.00"} SUI
-              </span>
+              </p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                <Calendar className="h-3 w-3" /> Submitted
+            <div className="space-y-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="h-3 w-3 text-primary" /> 
+                Date
               </span>
-              <span className="font-semibold text-sm">
-                {new Date(parseInt(submission.submittedAt)).toLocaleDateString()}
-              </span>
+              <p className="font-medium">
+                {new Date(parseInt(submission.submittedAt)).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </p>
             </div>
           </div>
+        </CardContent>
 
-          <div className="flex gap-2 relative z-10">
+        <CardFooter className="pt-0">
+          <div className="flex flex-col gap-2 w-full">
             <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 bg-transparent border-primary/20 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
-              onClick={() => setSelectedTask(task ?? null)}
-              disabled={!task}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Task Details
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 bg-transparent border-primary/20 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
+              className="w-full shadow-lg shadow-primary/10 group-hover:shadow-primary/20 transition-all"
               onClick={() => {
                 setViewSubmission(submission);
                 setViewDialogOpen(true);
@@ -171,8 +169,18 @@ export default function MySubmissionsPage() {
               <FileText className="h-4 w-4 mr-2" />
               View Submission
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground hover:text-primary"
+              onClick={() => setSelectedTask(task ?? null)}
+              disabled={!task}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View Task Details
+            </Button>
           </div>
-        </CardContent>
+        </CardFooter>
       </Card>
     );
   };

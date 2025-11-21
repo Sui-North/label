@@ -1,5 +1,14 @@
 /**
  * React Query hook for consensus management
+ * 
+ * IMPORTANT: New V3 Architecture Requirements
+ * The consensus hook now requires additional shared object IDs:
+ * - registryId: Task registry object (from TASK_REGISTRY_ID)
+ * - requesterProfileId: Requester's UserProfile object ID
+ * - qualityTrackerId: Quality tracker for this task
+ * - rejectedLabelers: Addresses of rejected labelers (matches rejectedIds order)
+ * 
+ * These are fetched from the task object and registry during consensus preparation.
  */
 
 import { useState } from "react";
@@ -8,10 +17,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   finalizeConsensusTransaction,
   PLATFORM_CONFIG_ID,
+  TASK_REGISTRY_ID,
 } from "@/lib/contracts/songsim";
 import { toast } from "sonner";
 
-export function useConsensus(taskObjectId: string, taskId: string) {
+export function useConsensus(
+  taskObjectId: string,
+  taskId: string,
+  requesterProfileId?: string,
+  qualityTrackerId?: string
+) {
   const [selectedAccepted, setSelectedAccepted] = useState<Set<string>>(
     new Set()
   );
@@ -61,10 +76,18 @@ export function useConsensus(taskObjectId: string, taskId: string) {
   const finalizeConsensus = async (
     acceptedIds: number[],
     acceptedLabelers: string[],
-    rejectedIds: number[]
+    rejectedIds: number[],
+    rejectedLabelers: string[]
   ) => {
-    if (!PLATFORM_CONFIG_ID) {
+    if (!PLATFORM_CONFIG_ID || !TASK_REGISTRY_ID) {
       toast.error("Platform not configured");
+      return;
+    }
+
+    if (!requesterProfileId || !qualityTrackerId) {
+      toast.error("Missing required objects", {
+        description: "Requester profile and quality tracker must be provided",
+      });
       return;
     }
 
@@ -73,10 +96,14 @@ export function useConsensus(taskObjectId: string, taskId: string) {
     try {
       const tx = finalizeConsensusTransaction(
         PLATFORM_CONFIG_ID,
+        TASK_REGISTRY_ID,
         taskObjectId,
+        requesterProfileId,
+        qualityTrackerId,
         acceptedIds,
         acceptedLabelers,
-        rejectedIds
+        rejectedIds,
+        rejectedLabelers
       );
 
       signAndExecute(

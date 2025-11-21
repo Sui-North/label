@@ -2,16 +2,18 @@
  * Songsim Smart Contract Constants
  *
  * Auto-generated from deployment on Sui Testnet
- * Upgraded: November 20, 2025 (v2.0.0 - Deadline Extension Feature)
- * Transaction: GbCpF6aBgqtmDLnAF8yBPyyoFV4tXbUXgv4h4jnMrpc7
- * Version: 2.0.0 (36/36 tests passing + Deadline Extension)
+ * Deployed: January 2025 (v3.0.0 - Shared Object Architecture)
+ * Transaction: 97F1tghBCqbDuSk2zpCXaJzxqtApFdy799JV1YGp9M9Z
+ * Version: 3.0.0 (19/19 tests passing)
  *
  * This deployment includes:
  * - Main songsim module (marketplace logic)
- * - Staking module (anti-Sybil protection) - NOW EXPOSED
+ * - Staking module (anti-Sybil protection)
  * - access_policy module (Seal encryption access control)
  * - migration module (version tracking & upgrades)
- * - NEW: extend_deadline function (requesters can extend task deadlines)
+ * - batch_updates module (post-consensus labeler updates)
+ * - quality module (per-task quality metrics)
+ * - ARCHITECTURE: Shared objects (Profile, Reputation, Submission, QualityTracker)
  * - All security features (quality, emergency, disputes, prize pools)
  */
 
@@ -19,25 +21,27 @@ export const NETWORK = "testnet" as const;
 
 export const CONTRACT = {
   PACKAGE_ID:
-    "0x437f4dac58b0dd5daeaecc66d4cb3571ae6e379cfd6f3018447f0b8bbffcc19d",
+    "0xe26690f7c4c45ee7ceedee6dceb2b269ab49581a2b9844ff1ca382fe8415757d",
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",
+  BATCH_UPDATES_MODULE: "batch_updates",
+  QUALITY_MODULE: "quality",
 } as const;
 
 export const OBJECTS = {
   ADMIN_CAP_ID:
-    "0x361efdc205a526c6dfaf5ef7313bac1dc1b1f690c6d0c7ac826bcb02a057d429",
+    "0xba868a6534fb40aa16b896c2b79382584f3c8f9a6d4a8232faf7285eeb139203",
   PLATFORM_CONFIG_ID:
-    "0x80ecfcccd12cfcfccb0436691d3cda735a02fc9d02a4f55bbea75cd8eb703385",
+    "0x57377260251d300719d7423db4a290e323b4c6a5383a70ea2ae26e36390e9ff1",
   TASK_REGISTRY_ID:
-    "0x8d0aaa56bac53294a2c35220bc66dc2159043d67d12a6b31a2605644edb7c82a",
+    "0xb3d5c0cfdb4cc0894f3c5dbd15f3f2b1f9daa94cd333f84c8a027e5d2fab8470",
   MIGRATION_STATE_ID:
-    "0xa6b0753bc01a20116959c36bbce33243faabc2ed1b74f7ac7a0a76d2c2a956c7",
+    "0xf35a64efef3f466da9d713f1c54272085d5dcd2c228c9b6f2909cf282699050c",
   ACCESS_REGISTRY_ID:
-    "0x703b68cc81fd3e9e450a6f3861b14238014c8d80aebe5b94405828f78fbb2e48",
+    "0xadfdc3da5595990615091002bcbe1bd9baff6a75b2f9b6f20794cad409b68c67",
   UPGRADE_CAP_ID:
-    "0xcf8a2af8ce073e32292d446c4fb356cddea0d66aaf5c112680f4f5a96322282a",
+    "0x200264ee1adfbb72e9e33d5acea96f7e8037374fa0123ae52fd3f5c7f282a59d",
 } as const;
 
 export const PLATFORM_CONFIG = {

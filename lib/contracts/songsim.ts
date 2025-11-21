@@ -70,6 +70,8 @@ export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
 
 /**
  * Create user profile transaction
+ * Note: Profile and Reputation are now shared objects (not owned)
+ * The contract automatically shares these objects after creation
  */
 export function createProfileTransaction(
   registryId: string,
@@ -237,16 +239,24 @@ export function submitLabelsTransaction(
 /**
  * Cancel task transaction
  * Requires the task to be in OPEN status with no submissions
- * The bounty amount will be split from the gas coin and refunded to the requester
+ * The bounty amount will be refunded to the requester
+ * Contract signature: entry fun cancel_task(registry, task, requester_profile, clock, ctx)
  */
-export function cancelTaskTransaction(taskObjectId: string): Transaction {
+export function cancelTaskTransaction(
+  registryId: string,
+  taskObjectId: string,
+  requesterProfileId: string
+): Transaction {
   const tx = new Transaction();
 
-  // Call cancel_task with the task object and clock
-  // Contract signature: entry fun cancel_task(labeling_task: &mut Task, clock: &Clock, ctx: &mut TxContext)
   tx.moveCall({
     target: `${PACKAGE_ID}::songsim::cancel_task`,
-    arguments: [tx.object(taskObjectId), tx.object(CLOCK_ID)],
+    arguments: [
+      tx.object(registryId),
+      tx.object(taskObjectId),
+      tx.object(requesterProfileId),
+      tx.object(CLOCK_ID),
+    ],
   });
 
   return tx;
@@ -573,21 +583,32 @@ export function formatSuiAmount(mist: bigint | string | number): string {
 }
 
 /**
- * Finalize consensus and distribute bounty to accepted labelers
- * @param configId - Platform config object ID
+ * Finalize consensus and distribute bounty with AUTOMATED payments and lifecycle updates
+ * Contract signature: public fun finalize_consensus(
+ *   config, registry, task, requester_profile, quality_tracker,
+ *   accepted_submission_ids, accepted_labelers,
+ *   rejected_submission_ids, rejected_labelers, clock, ctx
+ * )
+ * @param configId - Platform config object
+ * @param registryId - Task registry object
  * @param taskObjectId - Task object ID
+ * @param requesterProfileId - Requester's profile object ID
+ * @param qualityTrackerId - Quality tracker object ID for this task
  * @param acceptedSubmissionIds - Array of accepted submission IDs
- * @param acceptedLabelers - Array of labeler addresses (must match acceptedSubmissionIds order)
+ * @param acceptedLabelers - Array of accepted labeler addresses (must match submission IDs order)
  * @param rejectedSubmissionIds - Array of rejected submission IDs
- * @param clockId - Sui Clock object (0x6)
+ * @param rejectedLabelers - Array of rejected labeler addresses (must match rejected submission IDs order)
  */
 export function finalizeConsensusTransaction(
   configId: string,
+  registryId: string,
   taskObjectId: string,
+  requesterProfileId: string,
+  qualityTrackerId: string,
   acceptedSubmissionIds: number[],
   acceptedLabelers: string[],
   rejectedSubmissionIds: number[],
-  clockId: string = "0x6"
+  rejectedLabelers: string[]
 ): Transaction {
   const tx = new Transaction();
 
@@ -597,16 +618,25 @@ export function finalizeConsensusTransaction(
       "Accepted submission IDs must match labeler addresses count"
     );
   }
+  if (rejectedSubmissionIds.length !== rejectedLabelers.length) {
+    throw new Error(
+      "Rejected submission IDs must match rejected labeler addresses count"
+    );
+  }
 
   tx.moveCall({
     target: `${PACKAGE_ID}::songsim::finalize_consensus`,
     arguments: [
       tx.object(configId),
+      tx.object(registryId),
       tx.object(taskObjectId),
+      tx.object(requesterProfileId),
+      tx.object(qualityTrackerId),
       tx.pure.vector("u64", acceptedSubmissionIds),
       tx.pure.vector("address", acceptedLabelers),
       tx.pure.vector("u64", rejectedSubmissionIds),
-      tx.object(clockId),
+      tx.pure.vector("address", rejectedLabelers),
+      tx.object(CLOCK_ID),
     ],
   });
 

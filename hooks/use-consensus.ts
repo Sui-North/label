@@ -16,7 +16,7 @@ import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   finalizeConsensusTransaction,
-  updateSubmissionStatusTransaction,
+  batchUpdateSubmissionsTransaction,
   PLATFORM_CONFIG_ID,
   TASK_REGISTRY_ID,
 } from "@/lib/contracts/songsim";
@@ -116,41 +116,32 @@ export function useConsensus(
           onSuccess: async (result) => {
             console.log("Consensus finalized:", result);
             
-            // Update submission statuses - process accepted first
+            // Update submission statuses using batch function (5 per transaction)
+            const allSubmissions = [
+              ...acceptedSubmissionObjectIds.map(id => ({ id, accepted: true })),
+              ...rejectedSubmissionObjectIds.map(id => ({ id, accepted: false }))
+            ];
+            
             const updatePromises: Promise<any>[] = [];
             
-            for (const submissionObjectId of acceptedSubmissionObjectIds) {
-              const updateTx = updateSubmissionStatusTransaction(submissionObjectId, true);
+            // Process submissions in batches of 5
+            for (let i = 0; i < allSubmissions.length; i += 5) {
+              const batch = allSubmissions.slice(i, i + 5);
+              const submissionIds = batch.map(s => s.id);
+              const acceptanceFlags = batch.map(s => s.accepted);
+              
+              const updateTx = batchUpdateSubmissionsTransaction(submissionIds, acceptanceFlags);
+              
               const promise = new Promise((resolve, reject) => {
                 signAndExecute(
                   { transaction: updateTx },
                   {
                     onSuccess: (res) => {
-                      console.log(`Updated submission ${submissionObjectId} to ACCEPTED`);
+                      console.log(`Updated batch of ${batch.length} submissions`);
                       resolve(res);
                     },
                     onError: (err) => {
-                      console.error(`Failed to update submission ${submissionObjectId}:`, err);
-                      reject(err);
-                    },
-                  }
-                );
-              });
-              updatePromises.push(promise);
-            }
-            
-            for (const submissionObjectId of rejectedSubmissionObjectIds) {
-              const updateTx = updateSubmissionStatusTransaction(submissionObjectId, false);
-              const promise = new Promise((resolve, reject) => {
-                signAndExecute(
-                  { transaction: updateTx },
-                  {
-                    onSuccess: (res) => {
-                      console.log(`Updated submission ${submissionObjectId} to REJECTED`);
-                      resolve(res);
-                    },
-                    onError: (err) => {
-                      console.error(`Failed to update submission ${submissionObjectId}:`, err);
+                      console.error(`Failed to update submission batch:`, err);
                       reject(err);
                     },
                   }

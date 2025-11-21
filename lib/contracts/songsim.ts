@@ -239,9 +239,9 @@ export function submitLabelsTransaction(
 }
 
 /**
- * Update submission status after consensus
- * Called after finalize_consensus to update individual submission statuses
- * Contract signature: entry fun update_submission_after_consensus(submission: &mut Submission, is_accepted: bool, clock: &Clock)
+ * Update submission status after consensus - DEPRECATED
+ * Use batchUpdateSubmissionsTransaction() instead for better efficiency
+ * @deprecated
  */
 export function updateSubmissionStatusTransaction(
   submissionObjectId: string,
@@ -249,6 +249,8 @@ export function updateSubmissionStatusTransaction(
 ): Transaction {
   const tx = new Transaction();
 
+  // This calls the old single-submission function
+  // For new code, use batchUpdateSubmissionsTransaction()
   tx.moveCall({
     target: `${PACKAGE_ID}::songsim::update_submission_after_consensus`,
     arguments: [
@@ -256,6 +258,61 @@ export function updateSubmissionStatusTransaction(
       tx.pure.bool(isAccepted),
       tx.object(CLOCK_ID),
     ],
+  });
+
+  return tx;
+}
+
+/**
+ * Batch update submission statuses after consensus (NEW - more efficient)
+ * Updates up to 5 submissions in a single transaction
+ * Automatically selects the right contract function based on batch size
+ * 
+ * @param submissions - Array of submission object IDs (1-5)
+ * @param acceptanceFlags - Boolean array indicating if each submission is accepted (true) or rejected (false)
+ * @returns Transaction object
+ */
+export function batchUpdateSubmissionsTransaction(
+  submissions: string[],
+  acceptanceFlags: boolean[]
+): Transaction {
+  const tx = new Transaction();
+  const count = submissions.length;
+
+  // Validate inputs
+  if (count === 0 || count > 5) {
+    throw new Error(`Batch size must be 1-5, got ${count}`);
+  }
+  if (count !== acceptanceFlags.length) {
+    throw new Error(`Submissions (${count}) and acceptance flags (${acceptanceFlags.length}) length mismatch`);
+  }
+
+  // Select the right function based on batch size
+  const functionName = count === 1 
+    ? 'batch_update_submissions_1' 
+    : `batch_update_submissions_${count}`;
+
+  // Build arguments based on count
+  const args: any[] = [];
+  
+  // Add submission objects
+  for (let i = 0; i < count; i++) {
+    args.push(tx.object(submissions[i]));
+  }
+  
+  // For single submission, pass boolean directly, otherwise pass vector
+  if (count === 1) {
+    args.push(tx.pure.bool(acceptanceFlags[0]));
+  } else {
+    args.push(tx.pure.vector("bool", acceptanceFlags));
+  }
+  
+  // Add clock
+  args.push(tx.object(CLOCK_ID));
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::${functionName}`,
+    arguments: args,
   });
 
   return tx;

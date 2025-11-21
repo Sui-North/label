@@ -2,12 +2,13 @@
  * Songsim Smart Contract Constants
  *
  * Auto-generated from deployment on Sui Testnet
- * Deployed: January 2025 (v3.0.0 - Shared Object Architecture)
- * Transaction: 97F1tghBCqbDuSk2zpCXaJzxqtApFdy799JV1YGp9M9Z
- * Version: 3.0.0 (19/19 tests passing)
+ * Deployed: November 21, 2025 (v4.0.0 - Batch Submission Updates)
+ * Transaction: 217gS5Xha1aDwiH2hkSaXA1PNcwxnWxU8iKJkvAoSegW
+ * Version: 4.0.0
  *
  * This deployment includes:
  * - Main songsim module (marketplace logic)
+ * - NEW: batch_update_submissions() - Update up to 5 submission statuses at once
  * - Staking module (anti-Sybil protection)
  * - access_policy module (Seal encryption access control)
  * - migration module (version tracking & upgrades)
@@ -21,7 +22,7 @@ export const NETWORK = "testnet" as const;
 
 export const CONTRACT = {
   PACKAGE_ID:
-    "0xe26690f7c4c45ee7ceedee6dceb2b269ab49581a2b9844ff1ca382fe8415757d",
+    "0x386894d174ee5fc9b5d61c29dbc87ebb3a63139f9ff9f175d53d4b18b20df019",
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",
@@ -31,17 +32,17 @@ export const CONTRACT = {
 
 export const OBJECTS = {
   ADMIN_CAP_ID:
-    "0xba868a6534fb40aa16b896c2b79382584f3c8f9a6d4a8232faf7285eeb139203",
+    "0x7a20244472259959ffafa9d70385bcb7593b29b0c67d71d932a2330ada6e808d",
   PLATFORM_CONFIG_ID:
-    "0x57377260251d300719d7423db4a290e323b4c6a5383a70ea2ae26e36390e9ff1",
+    "0x25c4b71c7ead987430f2c4ab37afea9d7eab65d3976667353cbe00124f673ec6",
   TASK_REGISTRY_ID:
-    "0xb3d5c0cfdb4cc0894f3c5dbd15f3f2b1f9daa94cd333f84c8a027e5d2fab8470",
+    "0x927240e69cb7fae86ddef16151537398abe4ab52966b8dc0814cd51029869fde",
   MIGRATION_STATE_ID:
-    "0xf35a64efef3f466da9d713f1c54272085d5dcd2c228c9b6f2909cf282699050c",
+    "0x1a04c9cafa721875bdf0445e56215d832d1b8ad939c93d2fa53990fc50522b8f",
   ACCESS_REGISTRY_ID:
-    "0xadfdc3da5595990615091002bcbe1bd9baff6a75b2f9b6f20794cad409b68c67",
+    "0xa1c6c929da4570ccca5d68db5edbf88a0fd6361b0bb0f610503abdadc0b177a5",
   UPGRADE_CAP_ID:
-    "0x200264ee1adfbb72e9e33d5acea96f7e8037374fa0123ae52fd3f5c7f282a59d",
+    "0x8784187ddb2481f27c1d9836a79e35052c599ea12a5fb7bd0a2b71461f30219c",
 } as const;
 
 export const PLATFORM_CONFIG = {

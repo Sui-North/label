@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { useMyTasks } from "@/hooks/use-tasks";
 import { useTaskSubmissions } from "@/hooks/use-submissions";
-import { cancelTaskTransaction } from "@/lib/contracts/songsim";
+import { cancelTaskTransaction, TASK_REGISTRY_ID } from "@/lib/contracts/songsim";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -97,10 +97,14 @@ export default function MyTasksPage() {
 
     const handleCancelTask = async () => {
       if (!task || task.status !== "0" || submissions.length > 0) return;
+      if (!task.requesterProfileId || !TASK_REGISTRY_ID) {
+        toast.error("Missing required data");
+        return;
+      }
 
       setIsCancelling(true);
       try {
-        const tx = cancelTaskTransaction(task.objectId);
+        const tx = cancelTaskTransaction(TASK_REGISTRY_ID, task.objectId, task.requesterProfileId);
 
         signAndExecute(
           {

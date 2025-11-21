@@ -239,6 +239,29 @@ export function submitLabelsTransaction(
 }
 
 /**
+ * Update submission status after consensus
+ * Called after finalize_consensus to update individual submission statuses
+ * Contract signature: entry fun update_submission_after_consensus(submission: &mut Submission, is_accepted: bool, clock: &Clock)
+ */
+export function updateSubmissionStatusTransaction(
+  submissionObjectId: string,
+  isAccepted: boolean
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${PACKAGE_ID}::songsim::update_submission_after_consensus`,
+    arguments: [
+      tx.object(submissionObjectId),
+      tx.pure.bool(isAccepted),
+      tx.object(CLOCK_ID),
+    ],
+  });
+
+  return tx;
+}
+
+/**
  * Cancel task transaction
  * Requires the task to be in OPEN status with no submissions
  * The bounty amount will be refunded to the requester

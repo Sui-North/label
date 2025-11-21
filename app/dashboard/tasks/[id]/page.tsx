@@ -151,8 +151,15 @@ export default function TaskDetailPage({
       .filter((s) => rejectedObjectIds.includes(s.objectId))
       .map((s) => s.labeler);
 
-    // Use the hook's finalizeConsensus method with rejected labelers
-    await finalizeConsensus(acceptedIds, acceptedLabelers, rejectedIds, rejectedLabelers);
+    // Use the hook's finalizeConsensus method with rejected labelers and submission object IDs
+    await finalizeConsensus(
+      acceptedIds, 
+      acceptedLabelers, 
+      rejectedIds, 
+      rejectedLabelers,
+      acceptedObjectIds,  // Pass submission object IDs for status updates
+      rejectedObjectIds   // Pass submission object IDs for status updates
+    );
     setConsensusDialogOpen(false);
   };
 

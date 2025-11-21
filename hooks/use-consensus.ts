@@ -12,10 +12,11 @@
  */
 
 import { useState } from "react";
-import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   finalizeConsensusTransaction,
+  updateSubmissionStatusTransaction,
   PLATFORM_CONFIG_ID,
   TASK_REGISTRY_ID,
 } from "@/lib/contracts/songsim";
@@ -36,6 +37,7 @@ export function useConsensus(
   const [isProcessing, setIsProcessing] = useState(false);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const queryClient = useQueryClient();
+  const suiClient = useSuiClient();
 
   const toggleAccept = (submissionId: string) => {
     setSelectedAccepted((prev) => {
@@ -77,7 +79,9 @@ export function useConsensus(
     acceptedIds: number[],
     acceptedLabelers: string[],
     rejectedIds: number[],
-    rejectedLabelers: string[]
+    rejectedLabelers: string[],
+    acceptedSubmissionObjectIds: string[],
+    rejectedSubmissionObjectIds: string[]
   ) => {
     if (!PLATFORM_CONFIG_ID || !TASK_REGISTRY_ID) {
       toast.error("Platform not configured");
@@ -109,8 +113,61 @@ export function useConsensus(
       signAndExecute(
         { transaction: tx },
         {
-          onSuccess: (result) => {
+          onSuccess: async (result) => {
             console.log("Consensus finalized:", result);
+            
+            // Update submission statuses - process accepted first
+            const updatePromises: Promise<any>[] = [];
+            
+            for (const submissionObjectId of acceptedSubmissionObjectIds) {
+              const updateTx = updateSubmissionStatusTransaction(submissionObjectId, true);
+              const promise = new Promise((resolve, reject) => {
+                signAndExecute(
+                  { transaction: updateTx },
+                  {
+                    onSuccess: (res) => {
+                      console.log(`Updated submission ${submissionObjectId} to ACCEPTED`);
+                      resolve(res);
+                    },
+                    onError: (err) => {
+                      console.error(`Failed to update submission ${submissionObjectId}:`, err);
+                      reject(err);
+                    },
+                  }
+                );
+              });
+              updatePromises.push(promise);
+            }
+            
+            for (const submissionObjectId of rejectedSubmissionObjectIds) {
+              const updateTx = updateSubmissionStatusTransaction(submissionObjectId, false);
+              const promise = new Promise((resolve, reject) => {
+                signAndExecute(
+                  { transaction: updateTx },
+                  {
+                    onSuccess: (res) => {
+                      console.log(`Updated submission ${submissionObjectId} to REJECTED`);
+                      resolve(res);
+                    },
+                    onError: (err) => {
+                      console.error(`Failed to update submission ${submissionObjectId}:`, err);
+                      reject(err);
+                    },
+                  }
+                );
+              });
+              updatePromises.push(promise);
+            }
+
+            // Wait for all submission updates
+            try {
+              await Promise.all(updatePromises);
+              toast.success("All submission statuses updated!");
+            } catch (updateError) {
+              console.error("Some submission updates failed:", updateError);
+              toast.warning("Consensus finalized but some submission status updates failed");
+            }
+
             toast.success("Consensus finalized!", {
               description: `${acceptedIds.length} submission(s) accepted. Bounty distributed automatically.`,
             });

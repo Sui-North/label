@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 export function EnergyWaves() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0 });
   const requestRef = useRef<number>(0);
   const timeRef = useRef<number>(0);
@@ -41,7 +43,11 @@ export function EnergyWaves() {
 
     const animate = () => {
       // Fade effect for trails
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      // Fade effect for trails
+      ctx.fillStyle =
+        resolvedTheme === "dark"
+          ? "rgba(0, 0, 0, 0.1)"
+          : "rgba(255, 255, 255, 0.1)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       timeRef.current += 0.05;
@@ -69,7 +75,10 @@ export function EnergyWaves() {
           else ctx.lineTo(x, y);
         }
         
-        ctx.strokeStyle = `hsla(${200 + i * 5}, 80%, 60%, 0.3)`;
+        ctx.strokeStyle =
+          resolvedTheme === "dark"
+            ? `hsla(${200 + i * 5}, 80%, 60%, 0.3)`
+            : `hsla(${210 + i * 5}, 90%, 40%, 0.2)`;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -83,12 +92,14 @@ export function EnergyWaves() {
       window.removeEventListener("resize", resizeCanvas);
       cancelAnimationFrame(requestRef.current);
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none -z-10 mix-blend-screen"
+      className={`absolute inset-0 pointer-events-none -z-10 ${
+        resolvedTheme === "dark" ? "mix-blend-screen" : "mix-blend-multiply"
+      }`}
     />
   );
 }

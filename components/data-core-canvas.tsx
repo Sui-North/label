@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Environment } from "@react-three/drei";
 import { DataCore } from "./data-core";
@@ -19,7 +20,10 @@ export function DataCoreCanvas() {
         <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
         <spotLight position={[0, 10, 0]} intensity={0.8} angle={0.5} penumbra={1} />
         
-        <DataCore />
+        <Suspense fallback={null}>
+          <DataCore />
+          <Environment preset="city" />
+        </Suspense>
         
         <OrbitControls
           enableZoom={false}
@@ -29,8 +33,6 @@ export function DataCoreCanvas() {
           maxPolarAngle={Math.PI / 1.5}
           minPolarAngle={Math.PI / 3}
         />
-        
-        <Environment preset="city" />
       </Canvas>
     </div>
   );

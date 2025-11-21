@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 interface Particle {
   x: number;
@@ -13,6 +14,7 @@ interface Particle {
 
 export function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0 });
   const particlesRef = useRef<Particle[]>([]);
   const requestRef = useRef<number>(0);
@@ -56,7 +58,14 @@ export function ParticleField() {
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
           size: Math.random() * 2 + 1,
-          color: Math.random() > 0.5 ? "rgba(59, 130, 246, 0.2)" : "rgba(139, 92, 246, 0.2)",
+          color:
+            resolvedTheme === "dark"
+              ? Math.random() > 0.5
+                ? "rgba(59, 130, 246, 0.2)"
+                : "rgba(139, 92, 246, 0.2)"
+              : Math.random() > 0.5
+              ? "rgba(37, 99, 235, 0.15)"
+              : "rgba(124, 58, 237, 0.15)",
         });
       }
     };
@@ -109,7 +118,7 @@ export function ParticleField() {
       window.removeEventListener("resize", resizeCanvas);
       cancelAnimationFrame(requestRef.current);
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <canvas

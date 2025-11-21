@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 export function ActiveGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
   const mouseRef = useRef({ x: 0, y: 0 });
   const requestRef = useRef<number>(0);
   const timeRef = useRef<number>(0);
@@ -67,10 +69,16 @@ export function ActiveGrid() {
           if (alpha > 0) {
             ctx.beginPath();
             ctx.arc(x, y, 2 + alpha * 3, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(59, 130, 246, ${alpha * 0.5})`;
+            ctx.fillStyle =
+              resolvedTheme === "dark"
+                ? `rgba(59, 130, 246, ${alpha * 0.5})`
+                : `rgba(37, 99, 235, ${alpha * 0.4})`;
             ctx.fill();
           } else {
-            ctx.fillStyle = "rgba(59, 130, 246, 0.05)";
+            ctx.fillStyle =
+              resolvedTheme === "dark"
+                ? "rgba(59, 130, 246, 0.05)"
+                : "rgba(37, 99, 235, 0.08)";
             ctx.fillRect(x - 1, y - 1, 2, 2);
           }
         }
@@ -85,7 +93,7 @@ export function ActiveGrid() {
       window.removeEventListener("resize", resizeCanvas);
       cancelAnimationFrame(requestRef.current);
     };
-  }, []);
+  }, [resolvedTheme]);
 
   return (
     <canvas

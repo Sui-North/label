@@ -71,8 +71,8 @@ function DashboardContent() {
     if (!tasks || !account?.address) return null;
 
     const myTasks = tasks.filter((t) => t.requester === account.address);
-    const activeTasks = myTasks.filter((t) => t.status === "0" || t.status === "1"); // Open or In Progress
-    const completedTasks = myTasks.filter((t) => t.status === "2");
+    const activeTasks = myTasks.filter((t) => t.status === "0" || t.status === "1"); // 0=OPEN, 1=IN_PROGRESS
+    const completedTasks = myTasks.filter((t) => t.status === "2"); // 2=COMPLETED
     const totalSpent = myTasks.reduce((sum, t) => sum + Number(t.bounty), 0);
     const totalSpentSUI = (totalSpent / 1_000_000_000).toFixed(2);
 
@@ -137,20 +137,24 @@ function DashboardContent() {
   // Prepare chart data
   const taskStatusData = useMemo(() => {
     if (!requesterStats?.myTasks) return [];
-    const active = requesterStats.myTasks.filter(
+    const open = requesterStats.myTasks.filter(
       (t) => t.status === "0"
     ).length;
-    const completed = requesterStats.myTasks.filter(
+    const inProgress = requesterStats.myTasks.filter(
       (t) => t.status === "1"
     ).length;
-    const cancelled = requesterStats.myTasks.filter(
+    const completed = requesterStats.myTasks.filter(
       (t) => t.status === "2"
+    ).length;
+    const cancelled = requesterStats.myTasks.filter(
+      (t) => t.status === "3"
     ).length;
 
     return [
-      { name: "Active", value: active, fill: "hsl(var(--chart-1))" },
-      { name: "Completed", value: completed, fill: "hsl(var(--chart-2))" },
-      { name: "Cancelled", value: cancelled, fill: "hsl(var(--chart-3))" },
+      { name: "Open", value: open, fill: "hsl(var(--chart-1))" },
+      { name: "In Progress", value: inProgress, fill: "hsl(var(--chart-2))" },
+      { name: "Completed", value: completed, fill: "hsl(var(--chart-3))" },
+      { name: "Cancelled", value: cancelled, fill: "hsl(var(--chart-4))" },
     ].filter((item) => item.value > 0);
   }, [requesterStats]);
 
@@ -458,14 +462,15 @@ function DashboardContent() {
                 <CardContent>
                   <ChartContainer
                     config={{
-                      active: { label: "Active", color: "hsl(var(--chart-1))" },
+                      open: { label: "Open", color: "hsl(var(--chart-1))" },
+                      inProgress: { label: "In Progress", color: "hsl(var(--chart-2))" },
                       completed: {
                         label: "Completed",
-                        color: "hsl(var(--chart-2))",
+                        color: "hsl(var(--chart-3))",
                       },
                       cancelled: {
                         label: "Cancelled",
-                        color: "hsl(var(--chart-3))",
+                        color: "hsl(var(--chart-4))",
                       },
                     }}
                     className="h-[250px] w-full"
@@ -512,17 +517,19 @@ function DashboardContent() {
                           <div className="flex items-center gap-2 mt-1">
                             <Badge
                               variant={
-                                task.status === "0"
+                                task.status === "0" || task.status === "1"
                                   ? "default"
-                                  : task.status === "1"
+                                  : task.status === "2"
                                   ? "secondary"
                                   : "destructive"
                               }
                               className="text-xs"
                             >
                               {task.status === "0"
-                                ? "Active"
+                                ? "Open"
                                 : task.status === "1"
+                                ? "In Progress"
+                                : task.status === "2"
                                 ? "Completed"
                                 : "Cancelled"}
                             </Badge>

@@ -2,6 +2,9 @@
 
 A decentralized data labeling platform built on the Sui blockchain, integrating Walrus storage for datasets and label submissions.
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b5b6b6b6-b6b6-b6b6-b6b6-b6b6b6b6b6b6/deploy-status)](https://app.netlify.com/sites/songsim-label/deploys)
+**Live Demo:** [https://songsim-label.netlify.app/](https://songsim-label.netlify.app/)
+
 ## Overview
 
 Songsim Label connects data requesters with labelers in a trustless marketplace. Requesters post tasks with bounties, labelers submit labels, and smart contracts handle consensus and payouts automatically.

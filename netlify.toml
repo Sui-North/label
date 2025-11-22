@@ -1,0 +1,12 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Redirect all requests to Next.js for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

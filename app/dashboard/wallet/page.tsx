@@ -13,15 +13,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Wallet,
   Copy,
   ExternalLink,
-  TrendingUp,
   TrendingDown,
   ArrowUpRight,
   ArrowDownLeft,
@@ -29,15 +33,17 @@ import {
   Loader2,
   CheckCircle,
   Clock,
-  Coins,
   Activity,
   BarChart3,
   Check,
   Image as ImageIcon,
   Package,
   Zap,
-  Calendar,
-  Hash,
+  QrCode,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import { useMyTasks } from "@/hooks/use-tasks";
 import { useMySubmissions } from "@/hooks/use-submissions";
@@ -59,39 +65,39 @@ export default function WalletPage() {
   const [isLoadingTxs, setIsLoadingTxs] = useState(true);
   const [ownedObjects, setOwnedObjects] = useState<any[]>([]);
   const [isLoadingObjects, setIsLoadingObjects] = useState(true);
-  const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [txPage, setTxPage] = useState(0);
-  const [hasMoreTxs, setHasMoreTxs] = useState(false);
+  const [hideBalance, setHideBalance] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch wallet balance
+  const fetchBalance = async () => {
+    if (!account?.address) {
+      setIsLoadingBalance(false);
+      return;
+    }
+
+    try {
+      const balanceData = await suiClient.getBalance({
+        owner: account.address,
+      });
+      const suiBalance = (
+        Number(balanceData.totalBalance) / MIST_PER_SUI
+      ).toFixed(4);
+      setBalance(suiBalance);
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+      toast.error("Failed to fetch wallet balance");
+    } finally {
+      setIsLoadingBalance(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBalance = async () => {
-      if (!account?.address) {
-        setIsLoadingBalance(false);
-        return;
-      }
-
-      try {
-        const balanceData = await suiClient.getBalance({
-          owner: account.address,
-        });
-        const suiBalance = (
-          Number(balanceData.totalBalance) / MIST_PER_SUI
-        ).toFixed(4);
-        setBalance(suiBalance);
-      } catch (error) {
-        console.error("Error fetching balance:", error);
-        toast.error("Failed to fetch wallet balance");
-      } finally {
-        setIsLoadingBalance(false);
-      }
-    };
-
     fetchBalance();
   }, [account?.address, suiClient]);
 
-  // Fetch transaction history with pagination
+  // Fetch transaction history
   useEffect(() => {
     const fetchTransactions = async () => {
       if (!account?.address) {
@@ -112,7 +118,6 @@ export default function WalletPage() {
           limit: 20,
         });
         setTransactions(txData.data || []);
-        setHasMoreTxs(txData.hasNextPage);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       } finally {
@@ -121,7 +126,7 @@ export default function WalletPage() {
     };
 
     fetchTransactions();
-  }, [account?.address, suiClient, txPage]);
+  }, [account?.address, suiClient]);
 
   // Fetch owned objects
   useEffect(() => {
@@ -151,6 +156,13 @@ export default function WalletPage() {
 
     fetchOwnedObjects();
   }, [account?.address, suiClient]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchBalance();
+    toast.success("Balance refreshed");
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
   const copyAddress = () => {
     if (account?.address) {
@@ -183,7 +195,6 @@ export default function WalletPage() {
   };
 
   const getTransactionType = (tx: any) => {
-    // Analyze transaction to determine type
     if (tx.effects?.created?.length > 0) return "create";
     if (tx.effects?.mutated?.length > 0) return "update";
     return "transfer";
@@ -211,12 +222,12 @@ export default function WalletPage() {
       <div className="container mx-auto p-6 max-w-7xl animate-in fade-in duration-500">
         <Card className="glass-card border-dashed">
           <CardContent className="pt-12 pb-12 text-center">
-            <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <Wallet className="h-8 w-8 text-muted-foreground/50" />
+            <div className="h-20 w-20 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Wallet className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Wallet Not Connected</h3>
-            <p className="text-muted-foreground mb-6">
-              Please connect your wallet to view details
+            <h3 className="text-xl font-semibold mb-2">Wallet Not Connected</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              Connect your wallet to view your balance, transactions, and digital assets
             </p>
           </CardContent>
         </Card>
@@ -225,271 +236,335 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent animate-in slide-in-from-left duration-500">
-            My Wallet
-          </h1>
-          <p className="text-muted-foreground animate-in slide-in-from-left duration-500 delay-75">
-            Manage your blockchain assets and view transaction history
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowQR(!showQR)}
-          className="w-full md:w-auto transition-all duration-300 hover:scale-105"
-        >
-          {showQR ? "Hide" : "Show"} QR Code
-        </Button>
-      </div>
-
-      {/* QR Code Section with Animation */}
-      {showQR && (
-        <Card className="glass-card animate-in slide-in-from-top duration-300">
-          <CardContent className="pt-6 flex flex-col items-center">
-            <div className="bg-white p-4 rounded-lg mb-4 shadow-lg animate-in zoom-in duration-300">
-              <QRCodeSVG value={account.address} size={200} />
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              Scan to get wallet address
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Wallet Address Card with Enhanced Animation */}
-      <Card className="glass-card border-primary/20 animate-in slide-in-from-bottom duration-500">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
-              <Wallet className="h-5 w-5 text-primary" />
-            </div>
-            Wallet Address
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-muted/30 to-muted/10 rounded-lg border border-primary/10">
-            <code className="text-sm font-mono break-all flex-1">
-              {account.address}
-            </code>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                variant={copied ? "default" : "outline"}
-                size="sm"
-                onClick={copyAddress}
-                className={cn(
-                  "flex-1 sm:flex-none transition-all duration-300",
-                  copied && "bg-green-600 hover:bg-green-700"
-                )}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 mr-2 animate-in zoom-in duration-200" />
-                    Copied!
-                  </>
+    <div className="container mx-auto p-4 md:p-6 max-w-7xl space-y-6">
+      {/* Hero Section with Balance */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-purple-600 to-pink-600 p-8 md:p-10 text-white animate-in slide-in-from-top duration-500">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,black)]" />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 animate-pulse" />
+                <p className="text-sm font-medium text-white/80">Total Balance</p>
+              </div>
+              <div className="flex items-center gap-4">
+                {isLoadingBalance ? (
+                  <Loader2 className="h-10 w-10 animate-spin" />
                 ) : (
-                  <>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </>
+                  <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+                    {hideBalance ? "••••••" : balance}
+                  </h1>
+                )}
+                <span className="text-2xl font-semibold text-white/90">SUI</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => setHideBalance(!hideBalance)}
+                className="bg-white/20 hover:bg-white/30 border-white/20"
+              >
+                {hideBalance ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
                 )}
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="flex-1 sm:flex-none transition-all duration-300 hover:scale-105"
+                variant="secondary"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="bg-white/20 hover:bg-white/30 border-white/20"
               >
-                <a
-                  href={`${SUI_EXPLORER_BASE}/account/${account.address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Explorer
-                </a>
+                <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Balance Overview with Stagger Animation */}
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="glass-card hover:shadow-lg transition-all duration-300 border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 animate-in slide-in-from-left duration-500 hover:scale-105">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-primary">
-              Total Balance
-            </CardTitle>
-            <Coins className="h-4 w-4 text-primary animate-pulse" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingBalance ? (
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-primary animate-in zoom-in duration-300">
-                  {balance} SUI
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-white/20 backdrop-blur-sm">
+                  <QrCode className="h-4 w-4 mr-2" />
+                  QR Code
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Wallet QR Code</DialogTitle>
+                  <DialogDescription>
+                    Scan this QR code to get your wallet address
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-center p-6">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <QRCodeSVG value={account.address} size={250} />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Available balance
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              </DialogContent>
+            </Dialog>
 
-        <Card className="glass-card hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left duration-500 delay-75 hover:scale-105">
+            <Button
+              variant="secondary"
+              onClick={copyAddress}
+              className={cn(
+                "bg-white/20 hover:bg-white/30 border-white/20 backdrop-blur-sm transition-all duration-300",
+                copied && "bg-green-500/30"
+              )}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Address
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="secondary"
+              asChild
+              className="bg-white/20 hover:bg-white/30 border-white/20 backdrop-blur-sm"
+            >
+              <a
+                href={`${SUI_EXPLORER_BASE}/account/${account.address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View on Explorer
+              </a>
+            </Button>
+          </div>
+
+          {/* Address Display */}
+          <div className="pt-4 border-t border-white/20">
+            <p className="text-xs text-white/60 mb-1">Wallet Address</p>
+            <code className="text-sm font-mono text-white/90 break-all">
+              {account.address}
+            </code>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tasks Created</CardTitle>
-            <FileText className="h-4 w-4 text-blue-500" />
+            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <FileText className="h-4 w-4 text-blue-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalTasksCreated}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total tasks posted
-            </p>
+            <div className="text-3xl font-bold">{totalTasksCreated}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total posted</p>
           </CardContent>
         </Card>
 
-        <Card className="glass-card hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left duration-500 delay-150 hover:scale-105">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Acceptance Rate</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{acceptanceRate}%</div>
-            <Progress value={Number(acceptanceRate)} className="mt-2 h-1" />
+            <div className="text-3xl font-bold">{acceptanceRate}%</div>
+            <Progress value={Number(acceptanceRate)} className="mt-2 h-2" />
             <p className="text-xs text-muted-foreground mt-1">
               {acceptedSubmissions}/{totalSubmissions} accepted
             </p>
           </CardContent>
         </Card>
 
-        <Card className="glass-card hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left duration-500 delay-200 hover:scale-105">
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-l-4 border-l-orange-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
-            <TrendingDown className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <TrendingDown className="h-4 w-4 text-orange-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalSpent.toFixed(2)} SUI</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              On task bounties
-            </p>
+            <div className="text-3xl font-bold">{totalSpent.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground mt-1">SUI on bounties</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card hover:shadow-lg transition-all duration-300 hover:scale-105 border-l-4 border-l-purple-500">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-purple-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{transactions.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Recent activity</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs for Transactions and Objects */}
-      <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="transactions" className="transition-all duration-200">
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="activity" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 h-12">
+          <TabsTrigger value="activity" className="text-sm">
             <Activity className="h-4 w-4 mr-2" />
-            Transactions ({transactions.length})
+            Activity
           </TabsTrigger>
-          <TabsTrigger value="objects" className="transition-all duration-200">
+          <TabsTrigger value="assets" className="text-sm">
             <Package className="h-4 w-4 mr-2" />
-            Objects ({ownedObjects.length})
+            Assets
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-sm">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="transactions" className="space-y-4 animate-in fade-in duration-300">
+        {/* Activity Tab */}
+        <TabsContent value="activity" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-primary" />
-                Recent Transactions
-              </CardTitle>
-              <CardDescription>
-                Your latest blockchain transactions with detailed information
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Transaction History</CardTitle>
+                  <CardDescription>Your recent blockchain activity</CardDescription>
+                </div>
+                <Badge variant="secondary">{transactions.length} transactions</Badge>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoadingTxs ? (
-                <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : transactions.length === 0 ? (
-                <Alert>
-                  <Clock className="h-4 w-4" />
-                  <AlertDescription>
-                    No transactions found for this wallet.
-                  </AlertDescription>
-                </Alert>
+                <div className="text-center py-12">
+                  <div className="h-16 w-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+                    <Clock className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No transactions yet</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {transactions.map((tx, index) => {
                     const txType = getTransactionType(tx);
                     const balanceChanges = tx.balanceChanges || [];
                     
                     return (
-                      <div
-                        key={tx.digest || index}
-                        className="group flex flex-col p-4 border rounded-lg hover:bg-muted/30 hover:border-primary/30 transition-all duration-300 gap-3 animate-in slide-in-from-right"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <div className={cn(
-                            "h-10 w-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110",
-                            txType === "create" && "bg-green-500/10",
-                            txType === "update" && "bg-blue-500/10",
-                            txType === "transfer" && "bg-purple-500/10"
-                          )}>
-                            {txType === "create" && <Zap className="h-5 w-5 text-green-500" />}
-                            {txType === "update" && <ArrowUpRight className="h-5 w-5 text-blue-500" />}
-                            {txType === "transfer" && <ArrowDownLeft className="h-5 w-5 text-purple-500" />}
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium capitalize flex items-center gap-2">
-                                  {txType}
-                                  <Badge variant="outline" className="text-xs">
-                                    {tx.effects?.status?.status || "Unknown"}
-                                  </Badge>
-                                </p>
-                                <p className="text-xs text-muted-foreground font-mono truncate flex items-center gap-1 mt-1">
-                                  <Hash className="h-3 w-3" />
-                                  {formatAddress(tx.digest)}
-                                </p>
+                      <Dialog key={tx.digest || index}>
+                        <DialogTrigger asChild>
+                          <div
+                            className="group flex items-center gap-4 p-4 rounded-lg border hover:bg-muted/50 hover:border-primary/50 transition-all duration-300 cursor-pointer"
+                          >
+                            <div className={cn(
+                              "h-12 w-12 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110",
+                              txType === "create" && "bg-green-500/10",
+                              txType === "update" && "bg-blue-500/10",
+                              txType === "transfer" && "bg-purple-500/10"
+                            )}>
+                              {txType === "create" && <Zap className="h-6 w-6 text-green-500" />}
+                              {txType === "update" && <ArrowUpRight className="h-6 w-6 text-blue-500" />}
+                              {txType === "transfer" && <ArrowDownLeft className="h-6 w-6 text-purple-500" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-semibold capitalize">{txType}</p>
+                                <Badge variant="outline" className="text-xs">
+                                  {tx.effects?.status?.status || "Unknown"}
+                                </Badge>
                               </div>
+                              <p className="text-sm text-muted-foreground font-mono truncate">
+                                {formatAddress(tx.digest)}
+                              </p>
+                            </div>
+                            <div className="text-right">
                               {tx.timestampMs && (
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
+                                <p className="text-sm text-muted-foreground">
                                   {formatTimestamp(Number(tx.timestampMs))}
-                                </div>
+                                </p>
+                              )}
+                              {balanceChanges.length > 0 && (
+                                <p className={cn(
+                                  "text-sm font-semibold mt-1",
+                                  Number(balanceChanges[0].amount) > 0 ? "text-green-500" : "text-orange-500"
+                                )}>
+                                  {Number(balanceChanges[0].amount) > 0 ? "+" : ""}
+                                  {(Number(balanceChanges[0].amount) / MIST_PER_SUI).toFixed(4)} SUI
+                                </p>
                               )}
                             </div>
-                            
-                            {balanceChanges.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {balanceChanges.slice(0, 3).map((change: any, i: number) => (
-                                  <Badge key={i} variant="secondary" className="text-xs">
-                                    {Number(change.amount) > 0 ? "+" : ""}
-                                    {(Number(change.amount) / MIST_PER_SUI).toFixed(4)} SUI
-                                  </Badge>
-                                ))}
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              Transaction Details
+                              <Badge variant="outline">{txType}</Badge>
+                            </DialogTitle>
+                            <DialogDescription>
+                              View complete transaction information
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-sm font-medium mb-2">Transaction Hash</p>
+                              <code className="text-xs bg-muted p-2 rounded block break-all">
+                                {tx.digest}
+                              </code>
+                            </div>
+                            {tx.timestampMs && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Timestamp</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(Number(tx.timestampMs)).toLocaleString()}
+                                </p>
                               </div>
                             )}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            asChild
-                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          >
-                            <a
-                              href={`${SUI_EXPLORER_BASE}/tx/${tx.digest}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            {balanceChanges.length > 0 && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Balance Changes</p>
+                                <div className="space-y-2">
+                                  {balanceChanges.map((change: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between p-2 bg-muted rounded">
+                                      <span className="text-sm">{change.coinType?.split("::").pop()}</span>
+                                      <span className={cn(
+                                        "text-sm font-semibold",
+                                        Number(change.amount) > 0 ? "text-green-500" : "text-orange-500"
+                                      )}>
+                                        {Number(change.amount) > 0 ? "+" : ""}
+                                        {(Number(change.amount) / MIST_PER_SUI).toFixed(4)} SUI
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              asChild
                             >
-                              <ExternalLink className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        </div>
-                      </div>
+                              <a
+                                href={`${SUI_EXPLORER_BASE}/tx/${tx.digest}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                View on Explorer
+                              </a>
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     );
                   })}
                 </div>
@@ -498,90 +573,136 @@ export default function WalletPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="objects" className="space-y-4 animate-in fade-in duration-300">
+        {/* Assets Tab */}
+        <TabsContent value="assets" className="space-y-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                Owned Objects & NFTs
-              </CardTitle>
-              <CardDescription>
-                Digital assets and objects owned by this wallet
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Digital Assets</CardTitle>
+                  <CardDescription>NFTs and objects you own</CardDescription>
+                </div>
+                <Badge variant="secondary">{ownedObjects.length} items</Badge>
+              </div>
             </CardHeader>
             <CardContent>
               {isLoadingObjects ? (
-                <div className="flex items-center justify-center py-8">
+                <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : ownedObjects.length === 0 ? (
-                <Alert>
-                  <FileText className="h-4 w-4" />
-                  <AlertDescription>
-                    No objects found for this wallet.
-                  </AlertDescription>
-                </Alert>
+                <div className="text-center py-12">
+                  <div className="h-16 w-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">No assets found</p>
+                </div>
               ) : (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {ownedObjects.map((obj, index) => {
                     const objectType = obj.data?.type || "";
                     const typeName = getObjectTypeName(objectType);
                     const hasDisplay = obj.data?.display?.data;
                     
                     return (
-                      <div
+                      <Card
                         key={obj.data?.objectId || index}
-                        className="group p-4 border rounded-lg hover:border-primary/50 hover:shadow-lg transition-all duration-300 hover:scale-105 animate-in zoom-in"
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <Avatar className="h-12 w-12 transition-transform duration-300 group-hover:scale-110">
-                            {hasDisplay?.image_url ? (
-                              <AvatarImage src={hasDisplay.image_url} alt={hasDisplay.name} />
-                            ) : (
-                              <AvatarFallback className="bg-gradient-to-br from-primary/10 to-purple-500/10">
-                                <ImageIcon className="h-6 w-6 text-primary" />
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            asChild
-                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          >
-                            <a
-                              href={`${SUI_EXPLORER_BASE}/object/${obj.data?.objectId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          </Button>
+                        <div className="aspect-square bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center relative overflow-hidden">
+                          {hasDisplay?.image_url ? (
+                            <img
+                              src={hasDisplay.image_url}
+                              alt={hasDisplay.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
+                          )}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium truncate">
-                            {hasDisplay?.name || `Object #${index + 1}`}
+                        <CardContent className="p-4">
+                          <p className="font-semibold truncate mb-1">
+                            {hasDisplay?.name || `Asset #${index + 1}`}
                           </p>
                           {hasDisplay?.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">
+                            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                               {hasDisplay.description}
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground font-mono truncate">
-                            {obj.data?.objectId && formatAddress(obj.data.objectId)}
-                          </p>
-                          <Badge variant="outline" className="text-xs">
-                            {typeName}
-                          </Badge>
-                        </div>
-                      </div>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="secondary" className="text-xs">
+                              {typeName}
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              asChild
+                              className="h-8 w-8 p-0"
+                            >
+                              <a
+                                href={`${SUI_EXPLORER_BASE}/object/${obj.data?.objectId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
                 </div>
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-4">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Platform Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Tasks Created</span>
+                  <span className="text-2xl font-bold">{totalTasksCreated}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Submissions Made</span>
+                  <span className="text-2xl font-bold">{totalSubmissions}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Accepted</span>
+                  <span className="text-2xl font-bold text-green-500">{acceptedSubmissions}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="text-lg">Financial Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Current Balance</span>
+                  <span className="text-2xl font-bold text-primary">{balance} SUI</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Total Spent</span>
+                  <span className="text-2xl font-bold text-orange-500">{totalSpent.toFixed(2)} SUI</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-medium">Success Rate</span>
+                  <span className="text-2xl font-bold text-green-500">{acceptanceRate}%</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

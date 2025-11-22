@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
+import { LoadingProvider } from "@/contexts/loading-context";
+import GlobalLoader from "@/components/global-loader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,9 +32,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Providers>
-            <main className="min-h-screen">{children}</main>
-          </Providers>
+          <LoadingProvider>
+            <Providers>
+              <GlobalLoader />
+              <main className="min-h-screen">{children}</main>
+            </Providers>
+          </LoadingProvider>
         </ThemeProvider>
       </body>
     </html>

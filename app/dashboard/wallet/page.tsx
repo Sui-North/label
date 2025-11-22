@@ -49,6 +49,7 @@ import { useMyTasks } from "@/hooks/use-tasks";
 import { useMySubmissions } from "@/hooks/use-submissions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLoading } from "@/contexts/loading-context";
 
 const MIST_PER_SUI = 1_000_000_000;
 const SUI_EXPLORER_BASE = "https://suiscan.xyz/testnet";
@@ -58,6 +59,7 @@ export default function WalletPage() {
   const suiClient = useSuiClient();
   const { data: myTasks = [] } = useMyTasks();
   const { data: mySubmissions = [] } = useMySubmissions();
+  const { startLoading, updateProgress, finishLoading } = useLoading();
 
   const [balance, setBalance] = useState<string>("0");
   const [isLoadingBalance, setIsLoadingBalance] = useState(true);
@@ -77,19 +79,26 @@ export default function WalletPage() {
       return;
     }
 
+    const loadingKey = "wallet-balance";
+    startLoading(loadingKey);
+    updateProgress(loadingKey, 20);
+
     try {
       const balanceData = await suiClient.getBalance({
         owner: account.address,
       });
+      updateProgress(loadingKey, 80);
       const suiBalance = (
         Number(balanceData.totalBalance) / MIST_PER_SUI
       ).toFixed(4);
       setBalance(suiBalance);
+      updateProgress(loadingKey, 100);
     } catch (error) {
       console.error("Error fetching balance:", error);
       toast.error("Failed to fetch wallet balance");
     } finally {
       setIsLoadingBalance(false);
+      finishLoading(loadingKey);
     }
   };
 
@@ -105,6 +114,10 @@ export default function WalletPage() {
         return;
       }
 
+      const loadingKey = "wallet-transactions";
+      startLoading(loadingKey);
+      updateProgress(loadingKey, 30);
+
       try {
         const txData = await suiClient.queryTransactionBlocks({
           filter: {
@@ -117,11 +130,14 @@ export default function WalletPage() {
           },
           limit: 20,
         });
+        updateProgress(loadingKey, 90);
         setTransactions(txData.data || []);
+        updateProgress(loadingKey, 100);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       } finally {
         setIsLoadingTxs(false);
+        finishLoading(loadingKey);
       }
     };
 
@@ -136,6 +152,10 @@ export default function WalletPage() {
         return;
       }
 
+      const loadingKey = "wallet-objects";
+      startLoading(loadingKey);
+      updateProgress(loadingKey, 30);
+
       try {
         const objectsData = await suiClient.getOwnedObjects({
           owner: account.address,
@@ -146,11 +166,14 @@ export default function WalletPage() {
           },
           limit: 50,
         });
+        updateProgress(loadingKey, 90);
         setOwnedObjects(objectsData.data || []);
+        updateProgress(loadingKey, 100);
       } catch (error) {
         console.error("Error fetching owned objects:", error);
       } finally {
         setIsLoadingObjects(false);
+        finishLoading(loadingKey);
       }
     };
 

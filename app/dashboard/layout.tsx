@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useNavigationLoader } from "@/hooks/use-navigation-loader";
 import {
   LayoutDashboard,
   Briefcase,
@@ -121,6 +122,9 @@ export default function DashboardLayout({
   const [userRole, setUserRole] = useState<UserRole>("both");
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Add navigation loader
+  useNavigationLoader();
 
   useEffect(() => {
     if (!account) {

@@ -68,130 +68,90 @@ function Core() {
   );
 }
 
-function SuiSymbol3D({ scale = 1 }: { scale?: number }) {
-  const geometry = useMemo(() => {
-    // Create the outer droplet shape - more accurate to Sui logo
-    const outerShape = new THREE.Shape();
-    
-    // Start at the top point of the droplet
-    outerShape.moveTo(0, 1.0);
-    
-    // Right side of droplet (smoother curve)
-    outerShape.bezierCurveTo(
-      0.35, 0.95,  // control point 1 - gentle top curve
-      0.65, 0.6,   // control point 2
-      0.7, 0.2     // end point
-    );
-    outerShape.bezierCurveTo(
-      0.75, -0.2,  // control point 1
-      0.6, -0.65,  // control point 2
-      0.35, -0.85  // end point
-    );
-    outerShape.bezierCurveTo(
-      0.15, -0.95, // control point 1
-      0, -1.0,     // control point 2
-      0, -1.0      // bottom point
-    );
-    
-    // Left side of droplet (mirror of right)
-    outerShape.bezierCurveTo(
-      0, -1.0,     // control point 1
-      -0.15, -0.95,// control point 2
-      -0.35, -0.85 // end point
-    );
-    outerShape.bezierCurveTo(
-      -0.6, -0.65, // control point 1
-      -0.75, -0.2, // control point 2
-      -0.7, 0.2    // end point
-    );
-    outerShape.bezierCurveTo(
-      -0.65, 0.6,  // control point 1
-      -0.35, 0.95, // control point 2
-      0, 1.0       // back to top
-    );
+function SuiCoin3D({ scale = 1 }: { scale?: number }) {
+  const coinGeometry = useMemo(() => {
+    return new THREE.CylinderGeometry(1, 1, 0.15, 32);
+  }, []);
 
-    // Create the inner "S" curve - more flowing and accurate
+  const logoGeometry = useMemo(() => {
+    // Create simplified Sui logo for embossing
+    const logoShape = new THREE.Shape();
+    
+    // Outer droplet shape (smaller for coin)
+    logoShape.moveTo(0, 0.6);
+    logoShape.bezierCurveTo(0.2, 0.57, 0.4, 0.36, 0.42, 0.12);
+    logoShape.bezierCurveTo(0.45, -0.12, 0.36, -0.39, 0.21, -0.51);
+    logoShape.bezierCurveTo(0.09, -0.57, 0, -0.6, 0, -0.6);
+    logoShape.bezierCurveTo(0, -0.6, -0.09, -0.57, -0.21, -0.51);
+    logoShape.bezierCurveTo(-0.36, -0.39, -0.45, -0.12, -0.42, 0.12);
+    logoShape.bezierCurveTo(-0.4, 0.36, -0.2, 0.57, 0, 0.6);
+
+    // Inner S curve
     const innerCurve = new THREE.Shape();
-    
-    // Start from bottom left of S
-    innerCurve.moveTo(-0.25, -0.7);
-    
-    // Bottom curve of S (left side)
-    innerCurve.bezierCurveTo(
-      -0.4, -0.7,   // control point 1
-      -0.45, -0.55, // control point 2
-      -0.45, -0.4   // end point
-    );
-    innerCurve.bezierCurveTo(
-      -0.45, -0.2,  // control point 1
-      -0.3, -0.05,  // control point 2
-      -0.1, 0.05    // end point - middle of S
-    );
-    
-    // Top curve of S (right side)
-    innerCurve.bezierCurveTo(
-      0.1, 0.15,    // control point 1
-      0.25, 0.3,    // control point 2
-      0.25, 0.5     // end point
-    );
-    innerCurve.bezierCurveTo(
-      0.25, 0.65,   // control point 1
-      0.15, 0.75,   // control point 2
-      0, 0.75       // end point - top right
-    );
-    
-    // Top outer edge
-    innerCurve.lineTo(-0.05, 0.75);
-    innerCurve.bezierCurveTo(
-      0.05, 0.7,    // control point 1
-      0.15, 0.62,   // control point 2
-      0.15, 0.48    // end point
-    );
-    innerCurve.bezierCurveTo(
-      0.15, 0.35,   // control point 1
-      0.05, 0.22,   // control point 2
-      -0.08, 0.12   // end point - middle return
-    );
-    
-    // Bottom return curve
-    innerCurve.bezierCurveTo(
-      -0.22, 0.02,  // control point 1
-      -0.35, -0.15, // control point 2
-      -0.35, -0.38  // end point
-    );
-    innerCurve.bezierCurveTo(
-      -0.35, -0.52, // control point 1
-      -0.28, -0.62, // control point 2
-      -0.15, -0.65  // end point
-    );
-    
-    // Bottom outer edge - close the shape
-    innerCurve.lineTo(-0.25, -0.7);
+    innerCurve.moveTo(-0.15, -0.42);
+    innerCurve.bezierCurveTo(-0.24, -0.42, -0.27, -0.33, -0.27, -0.24);
+    innerCurve.bezierCurveTo(-0.27, -0.12, -0.18, -0.03, -0.06, 0.03);
+    innerCurve.bezierCurveTo(0.06, 0.09, 0.15, 0.18, 0.15, 0.3);
+    innerCurve.bezierCurveTo(0.15, 0.39, 0.09, 0.45, 0, 0.45);
+    innerCurve.lineTo(-0.03, 0.45);
+    innerCurve.bezierCurveTo(0.03, 0.42, 0.09, 0.37, 0.09, 0.29);
+    innerCurve.bezierCurveTo(0.09, 0.21, 0.03, 0.13, -0.05, 0.07);
+    innerCurve.bezierCurveTo(-0.13, 0.01, -0.21, -0.09, -0.21, -0.23);
+    innerCurve.bezierCurveTo(-0.21, -0.31, -0.17, -0.37, -0.09, -0.39);
+    innerCurve.lineTo(-0.15, -0.42);
 
-    // Add the inner curve as a hole
-    outerShape.holes.push(innerCurve);
+    logoShape.holes.push(innerCurve);
 
     const extrudeSettings = {
-      depth: 0.12,
-      bevelEnabled: true,
-      bevelThickness: 0.03,
-      bevelSize: 0.02,
-      bevelSegments: 5
+      depth: 0.04,
+      bevelEnabled: false
     };
 
-    return new THREE.ExtrudeGeometry(outerShape, extrudeSettings);
+    return new THREE.ExtrudeGeometry(logoShape, extrudeSettings);
   }, []);
 
   return (
-    <mesh geometry={geometry} scale={scale}>
-      <meshStandardMaterial
-        color="#4FA9FF"
-        emissive="#2563eb"
-        emissiveIntensity={0.4}
-        metalness={0.6}
-        roughness={0.3}
-      />
-    </mesh>
+    <group scale={scale}>
+      {/* Main coin body */}
+      <mesh geometry={coinGeometry} rotation={[Math.PI / 2, 0, 0]}>
+        <meshStandardMaterial
+          color="#6FBCF0"
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+      
+      {/* Coin edge (rim) */}
+      <mesh geometry={coinGeometry} rotation={[Math.PI / 2, 0, 0]} scale={[1.02, 1, 1.02]}>
+        <meshStandardMaterial
+          color="#4A90C8"
+          metalness={0.95}
+          roughness={0.05}
+        />
+      </mesh>
+
+      {/* Logo on front side */}
+      <mesh geometry={logoGeometry} position={[0, 0, 0.08]} rotation={[0, 0, 0]}>
+        <meshStandardMaterial
+          color="#FFFFFF"
+          metalness={0.7}
+          roughness={0.3}
+          emissive="#6FBCF0"
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+
+      {/* Logo on back side */}
+      <mesh geometry={logoGeometry} position={[0, 0, -0.08]} rotation={[0, Math.PI, 0]}>
+        <meshStandardMaterial
+          color="#FFFFFF"
+          metalness={0.7}
+          roughness={0.3}
+          emissive="#6FBCF0"
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+    </group>
   );
 }
 
@@ -207,6 +167,7 @@ function SuiLogoSatellite({
   size: number;
 }) {
   const ref = useRef<THREE.Group>(null);
+  const coinRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
     if (ref.current) {
@@ -218,22 +179,29 @@ function SuiLogoSatellite({
       ref.current.position.z = Math.sin(angle) * radius;
       ref.current.position.y = Math.sin(angle * 2) * (radius * 0.3);
       
-      // Rotate the symbol to always face outward
+      // Rotate the coin to face outward
       ref.current.rotation.y = -angle;
+    }
+    
+    // Spin the coin
+    if (coinRef.current) {
+      coinRef.current.rotation.y += 0.02;
     }
   });
 
   return (
     <group ref={ref}>
       <Trail
-        width={size * 3}
-        length={10}
-        color={new THREE.Color("#3b82f6")}
+        width={size * 2}
+        length={8}
+        color={new THREE.Color("#6FBCF0")}
         attenuation={(t) => t * t}
       >
-        <SuiSymbol3D scale={size} />
+        <group ref={coinRef}>
+          <SuiCoin3D scale={size} />
+        </group>
         {/* Glow effect */}
-        <pointLight position={[0, 0, 0]} intensity={0.5} color="#3b82f6" distance={2} />
+        <pointLight position={[0, 0, 0]} intensity={0.3} color="#6FBCF0" distance={1.5} />
       </Trail>
     </group>
   );
@@ -278,10 +246,10 @@ export function DataCore() {
     <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
       <Core />
       
-      {/* Sui Logo Satellites */}
-      <SuiLogoSatellite radius={2.2} speed={1} offset={0} size={0.4} />
-      <SuiLogoSatellite radius={2.8} speed={0.8} offset={2} size={0.35} />
-      <SuiLogoSatellite radius={3.5} speed={0.6} offset={4} size={0.45} />
+      {/* Sui Coin Satellites */}
+      <SuiLogoSatellite radius={2.2} speed={1} offset={0} size={0.3} />
+      <SuiLogoSatellite radius={2.8} speed={0.8} offset={2} size={0.25} />
+      <SuiLogoSatellite radius={3.5} speed={0.6} offset={4} size={0.32} />
       
       {/* Data Rings */}
       <DataRing radius={2.5} speed={1} rotation={[Math.PI / 3, 0, 0]} />

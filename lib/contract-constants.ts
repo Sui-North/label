@@ -22,7 +22,7 @@ export const NETWORK = "testnet" as const;
 
 export const CONTRACT = {
   PACKAGE_ID:
-    "0x386894d174ee5fc9b5d61c29dbc87ebb3a63139f9ff9f175d53d4b18b20df019",
+    process.env.NEXT_PUBLIC_PACKAGE_ID,
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",
@@ -32,17 +32,17 @@ export const CONTRACT = {
 
 export const OBJECTS = {
   ADMIN_CAP_ID:
-    "0x7a20244472259959ffafa9d70385bcb7593b29b0c67d71d932a2330ada6e808d",
+    process.env.NEXT_PUBLIC_ADMIN_CAP_ID,
   PLATFORM_CONFIG_ID:
-    "0x25c4b71c7ead987430f2c4ab37afea9d7eab65d3976667353cbe00124f673ec6",
+    process.env.NEXT_PUBLIC_PLATFORM_CONFIG_ID,
   TASK_REGISTRY_ID:
-    "0x927240e69cb7fae86ddef16151537398abe4ab52966b8dc0814cd51029869fde",
+    process.env.NEXT_PUBLIC_TASK_REGISTRY_ID,
   MIGRATION_STATE_ID:
-    "0x1a04c9cafa721875bdf0445e56215d832d1b8ad939c93d2fa53990fc50522b8f",
+    process.env.NEXT_PUBLIC_MIGRATION_STATE_ID,
   ACCESS_REGISTRY_ID:
-    "0xa1c6c929da4570ccca5d68db5edbf88a0fd6361b0bb0f610503abdadc0b177a5",
+    process.env.NEXT_PUBLIC_ACCESS_REGISTRY_ID,
   UPGRADE_CAP_ID:
-    "0x8784187ddb2481f27c1d9836a79e35052c599ea12a5fb7bd0a2b71461f30219c",
+    process.env.NEXT_PUBLIC_UPGRADE_CAP_ID,
 } as const;
 
 export const PLATFORM_CONFIG = {

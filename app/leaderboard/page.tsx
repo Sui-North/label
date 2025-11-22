@@ -401,8 +401,8 @@ export default function LeaderboardPage() {
         <CardContent className="p-0">
           <div className="space-y-0">
             <div className="grid grid-cols-12 gap-4 p-4 font-medium text-xs uppercase tracking-wider text-muted-foreground bg-muted/20 border-b">
-              <div className="col-span-1 text-center">Rank</div>
-              <div className="col-span-5 md:col-span-4">User</div>
+              <div className="col-span-2 md:col-span-1 text-center">Rank</div>
+              <div className="col-span-6 md:col-span-4">User</div>
               <div className="col-span-2 text-right hidden md:block">Score</div>
               <div className="col-span-2 text-right">Tasks</div>
               <div className="col-span-2 text-right hidden md:block">
@@ -415,12 +415,12 @@ export default function LeaderboardPage() {
                 key={entry.rank}
                 className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/40 transition-colors border-b last:border-0 items-center group"
               >
-                <div className="col-span-1 flex justify-center">
+                <div className="col-span-2 md:col-span-1 flex justify-center">
                   <span className="font-mono text-muted-foreground font-medium group-hover:text-foreground transition-colors">
                     #{entry.rank}
                   </span>
                 </div>
-                <div className="col-span-5 md:col-span-4 flex items-center">
+                <div className="col-span-6 md:col-span-4 flex items-center">
                   <UserDisplay
                     address={entry.address}
                     size="sm"

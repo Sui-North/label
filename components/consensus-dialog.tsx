@@ -89,7 +89,7 @@ export function ConsensusDialog({
         </DialogHeader>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
           <div className="text-center">
             <p className="text-2xl font-bold text-blue-600">
               {pendingSubmissions.length}

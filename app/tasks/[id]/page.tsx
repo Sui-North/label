@@ -301,7 +301,7 @@ export default function TaskDetailPage() {
 
       <div className="container mx-auto px-4 max-w-6xl -mt-8 relative z-20 space-y-8">
         {/* Key Metrics Grid */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="glass-card hover:border-primary/30 transition-colors">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Bounty</CardTitle>

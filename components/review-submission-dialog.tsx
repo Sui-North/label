@@ -106,7 +106,7 @@ export function ReviewSubmissionDialog({
           </div>
 
           {/* Submission Details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-muted-foreground">
                 Submitted At
@@ -146,7 +146,7 @@ export function ReviewSubmissionDialog({
             <h4 className="text-sm font-medium text-muted-foreground">
               Result File
             </h4>
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg bg-card gap-4 sm:gap-0">
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <FileText className="h-5 w-5 text-blue-600" />
@@ -181,7 +181,7 @@ export function ReviewSubmissionDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
           {onAccept && onReject && submission && (
             <div className="flex items-center gap-2 mr-auto">
               <Button

@@ -233,7 +233,7 @@ export default function MySubmissionsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="glass-card hover:shadow-lg transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -450,7 +450,7 @@ export default function MySubmissionsPage() {
           {selectedTask && (
             <div className="space-y-6 mt-4">
               {/* Task Info Grid */}
-              <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-xl border">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-xl border">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <DollarSign className="h-5 w-5" />

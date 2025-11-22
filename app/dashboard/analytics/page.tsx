@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
         {showRequesterAnalytics && (
           <TabsContent value="requester" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Requester Overview */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="glass-card hover:shadow-lg transition-all duration-300 border-primary/20 bg-primary/5">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-primary">
@@ -303,7 +303,7 @@ export default function AnalyticsPage() {
         {showLabelerAnalytics && (
           <TabsContent value="labeler" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* Labeler Overview */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="glass-card hover:shadow-lg transition-all duration-300 border-primary/20 bg-primary/5">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-primary">

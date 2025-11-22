@@ -398,7 +398,7 @@ export default function MyTasksPage() {
 
         <TabsContent value="active" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {activeTasks.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {activeTasks.map((task) => (
                 <TaskCard key={task.objectId} task={task} />
               ))}
@@ -426,7 +426,7 @@ export default function MyTasksPage() {
 
         <TabsContent value="completed" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {completedTasks.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {completedTasks.map((task) => (
                 <TaskCard key={task.objectId} task={task} />
               ))}
@@ -448,7 +448,7 @@ export default function MyTasksPage() {
 
         <TabsContent value="cancelled" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {cancelledTasks.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
               {cancelledTasks.map((task) => (
                 <TaskCard key={task.objectId} task={task} />
               ))}

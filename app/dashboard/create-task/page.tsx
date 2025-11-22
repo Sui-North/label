@@ -337,7 +337,7 @@ export default function CreateTaskPage() {
           <Label htmlFor="dataset" className="text-base font-medium">
             Dataset Files <span className="text-destructive">*</span>
           </Label>
-          <div className="mt-3 border-2 border-dashed border-primary/20 rounded-xl p-10 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group relative overflow-hidden">
+          <div className="mt-3 border-2 border-dashed border-primary/20 rounded-xl p-6 md:p-10 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group relative overflow-hidden">
             <input
               id="dataset"
               type="file"
@@ -425,7 +425,7 @@ export default function CreateTaskPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="title">
               Task Title <span className="text-destructive">*</span>
@@ -538,7 +538,7 @@ export default function CreateTaskPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="reward" className="flex items-center gap-2">
@@ -684,7 +684,7 @@ export default function CreateTaskPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="bg-muted/30 p-4 rounded-xl border">
               <h3 className="font-semibold mb-3 flex items-center gap-2">

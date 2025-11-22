@@ -103,7 +103,7 @@ export function HeroSection() {
             </div>
 
             {/* 3D Data Core - Right Side */}
-            <FadeIn delay={0.4} className="flex-1 w-full lg:w-auto">
+            <FadeIn delay={0.4} className="flex-1 w-full lg:w-auto min-h-[300px] lg:min-h-0 relative">
               <DataCoreCanvas />
             </FadeIn>
           </div>

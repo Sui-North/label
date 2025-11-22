@@ -95,7 +95,7 @@ export function ReputationCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
           <div className="text-center">
             <div className="text-2xl font-bold">{totalCompleted}</div>
             <div className="text-xs text-muted-foreground">Completed</div>

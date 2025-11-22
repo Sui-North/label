@@ -104,7 +104,7 @@ export function UserDisplay({
         </Avatar>
         <div className="flex flex-col">
           <span 
-            className={`font-medium ${textSizeClasses[size]} ${clickable ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+            className={`font-medium ${textSizeClasses[size]} ${clickable ? "cursor-pointer hover:text-primary transition-colors" : ""} truncate max-w-[150px] sm:max-w-[200px]`}
             onClick={() => clickable && setDialogOpen(true)}
           >
             {displayName}

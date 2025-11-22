@@ -70,7 +70,7 @@ export default function HomePage() {
               </p>
             </FadeIn>
 
-            <StaggerContainer className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <StaggerContainer className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               <StaggerItem>
                 <div className="glass-card p-6 rounded-2xl hover:border-primary/50 transition-all duration-300 group">
                   <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -165,7 +165,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <StaggerContainer className="grid gap-8 md:grid-cols-3 relative">
+              <StaggerContainer className="grid gap-8 grid-cols-1 md:grid-cols-3 relative">
                 <StaggerItem>
                   <div className="relative p-8 rounded-2xl border border-border bg-background/50 backdrop-blur hover:border-primary/50 transition-all group">
                     <div className="absolute -top-6 left-8 h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg shadow-primary/30">
@@ -230,7 +230,7 @@ export default function HomePage() {
               </p>
             </FadeIn>
 
-            <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
               <div className="glass-card p-6 rounded-2xl text-center">
                 <div className="text-4xl font-bold text-primary mb-2">
                   {tasksLoading ? "..." : totalTasks}

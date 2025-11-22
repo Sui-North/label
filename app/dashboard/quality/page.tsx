@@ -215,7 +215,7 @@ export default function QualityPage() {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="glass-card hover:border-primary/30 transition-colors group">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
@@ -312,7 +312,7 @@ export default function QualityPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl bg-muted/30 border text-center hover:bg-muted/50 transition-colors">
                     <p className="text-3xl font-bold text-foreground">
                       {stats.totalSubmissions}

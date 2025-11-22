@@ -200,8 +200,8 @@ export default function AvailableTasksPage() {
       {/* Filters and Search */}
       <Card className="glass-card">
         <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-12">
-            <div className="md:col-span-5 relative">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
+            <div className="col-span-full md:col-span-5 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search tasks by title or description..."
@@ -210,7 +210,7 @@ export default function AvailableTasksPage() {
                 className="pl-10 bg-background/50"
               />
             </div>
-            <div className="md:col-span-3">
+            <div className="col-span-full md:col-span-3">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="bg-background/50">
                   <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -225,7 +225,7 @@ export default function AvailableTasksPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="md:col-span-4">
+            <div className="col-span-full md:col-span-4">
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="bg-background/50">
                   <TrendingUp className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -255,7 +255,7 @@ export default function AvailableTasksPage() {
           </Badge>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTasks.length > 0 ? (
             filteredTasks.map((task) => (
               <TaskCard key={task.objectId} task={task} />

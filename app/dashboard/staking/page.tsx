@@ -202,7 +202,7 @@ export default function StakingPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {stakes.map((stake) => (
                 <Card key={stake.objectId} className="border bg-card/50 hover:bg-card transition-colors overflow-hidden">
                   <div className={`h-1 w-full ${!stake.isLocked ? "bg-green-500" : "bg-blue-500"}`} />

@@ -126,7 +126,7 @@ export default function PrizePoolsPage() {
                   className="bg-background/50"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="prize">Prize Amount (SUI)</Label>
                   <Input
@@ -151,7 +151,7 @@ export default function PrizePoolsPage() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="start">Start Date</Label>
                   <Input
@@ -235,7 +235,7 @@ export default function PrizePoolsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {activePools.map((pool) => (
                 <Card key={pool.objectId} className="glass-card hover:border-primary/30 transition-all duration-300 group flex flex-col h-full">
                   <CardHeader className="pb-3">
@@ -320,7 +320,7 @@ export default function PrizePoolsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {endedPools.map((pool) => (
                 <Card key={pool.objectId} className="glass-card opacity-80 hover:opacity-100 transition-opacity">
                   <CardHeader className="pb-3">

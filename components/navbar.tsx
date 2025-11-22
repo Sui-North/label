@@ -24,7 +24,9 @@ import {
   User,
   Settings,
   LogOut,
+  Menu,
 } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
 export function Navbar() {
   const router = useRouter();
@@ -62,6 +64,7 @@ export function Navbar() {
             Songsim Label
           </Link>
 
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             <Button variant="ghost" asChild>
               <Link href="/tasks">
@@ -75,6 +78,40 @@ export function Navbar() {
                 Leaderboard
               </Link>
             </Button>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <div className="flex flex-col gap-4 mt-8">
+                  <Link
+                    href="/"
+                    className="flex items-center gap-2 font-bold text-xl bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
+                  >
+                    <Tag className="h-6 w-6 text-blue-600" />
+                    Songsim Label
+                  </Link>
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link href="/tasks">
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      Browse Tasks
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" asChild className="justify-start">
+                    <Link href="/leaderboard">
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Leaderboard
+                    </Link>
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 

@@ -2,13 +2,14 @@
  * Songsim Smart Contract Constants
  *
  * Auto-generated from deployment on Sui Testnet
- * Deployed: November 21, 2025 (v4.0.0 - Batch Submission Updates)
- * Transaction: 217gS5Xha1aDwiH2hkSaXA1PNcwxnWxU8iKJkvAoSegW
- * Version: 4.0.0
+ * Deployed: November 22, 2025 (v3.2.0 - Profile Update Functions)
+ * Transaction: AUhvnZLyGSmmYwQmVFsy26ab3UpccA3s6XXU4BMsQojY
+ * Version: 3.2.0
  *
  * This deployment includes:
  * - Main songsim module (marketplace logic)
- * - NEW: batch_update_submissions() - Update up to 5 submission statuses at once
+ * - NEW: update_profile() - Update user profile information
+ * - NEW: update_user_type() - Update user role preference
  * - Staking module (anti-Sybil protection)
  * - access_policy module (Seal encryption access control)
  * - migration module (version tracking & upgrades)
@@ -21,10 +22,10 @@
 export const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || "testnet";
 
 export const CONTRACT = {
-  PACKAGE_ID:
-    process.env.NEXT_PUBLIC_PACKAGE_ID,
+  PACKAGE_ID: process.env.NEXT_PUBLIC_PACKAGE_ID,
   SEAL_PACKAGE_ID:
-    process.env.NEXT_PUBLIC_SEAL_PACKAGE_ID || process.env.NEXT_PUBLIC_PACKAGE_ID,
+    process.env.NEXT_PUBLIC_SEAL_PACKAGE_ID ||
+    process.env.NEXT_PUBLIC_PACKAGE_ID,
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",
@@ -33,18 +34,12 @@ export const CONTRACT = {
 } as const;
 
 export const OBJECTS = {
-  ADMIN_CAP_ID:
-    process.env.NEXT_PUBLIC_ADMIN_CAP_ID,
-  PLATFORM_CONFIG_ID:
-    process.env.NEXT_PUBLIC_PLATFORM_CONFIG_ID,
-  TASK_REGISTRY_ID:
-    process.env.NEXT_PUBLIC_TASK_REGISTRY_ID,
-  MIGRATION_STATE_ID:
-    process.env.NEXT_PUBLIC_MIGRATION_STATE_ID,
-  ACCESS_REGISTRY_ID:
-    process.env.NEXT_PUBLIC_ACCESS_REGISTRY_ID,
-  UPGRADE_CAP_ID:
-    process.env.NEXT_PUBLIC_UPGRADE_CAP_ID,
+  ADMIN_CAP_ID: process.env.NEXT_PUBLIC_ADMIN_CAP_ID,
+  PLATFORM_CONFIG_ID: process.env.NEXT_PUBLIC_PLATFORM_CONFIG_ID,
+  TASK_REGISTRY_ID: process.env.NEXT_PUBLIC_TASK_REGISTRY_ID,
+  MIGRATION_STATE_ID: process.env.NEXT_PUBLIC_MIGRATION_STATE_ID,
+  ACCESS_REGISTRY_ID: process.env.NEXT_PUBLIC_ACCESS_REGISTRY_ID,
+  UPGRADE_CAP_ID: process.env.NEXT_PUBLIC_UPGRADE_CAP_ID,
 } as const;
 
 export const PLATFORM_CONFIG = {
@@ -79,7 +74,9 @@ export const REPUTATION = {
 } as const;
 
 export const RPC_ENDPOINTS = {
-  TESTNET: process.env.NEXT_PUBLIC_SUI_RPC_URL || "https://fullnode.testnet.sui.io:443",
+  TESTNET:
+    process.env.NEXT_PUBLIC_SUI_RPC_URL ||
+    "https://fullnode.testnet.sui.io:443",
 } as const;
 
 export const EXPLORER_URLS = {

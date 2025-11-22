@@ -48,6 +48,7 @@ import {
   TASK_REGISTRY_ID,
   USER_TYPES,
   PACKAGE_ID,
+  CLOCK_ID,
 } from "@/lib/contracts/songsim";
 
 type UserType = 1 | 2 | 3;
@@ -217,6 +218,7 @@ export default function ProfilePage() {
           arguments: [
             tx.object(profile.objectId),
             tx.pure.u8(formData.userType),
+            tx.object(CLOCK_ID),
           ],
         });
       }

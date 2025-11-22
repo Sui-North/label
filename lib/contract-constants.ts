@@ -18,11 +18,13 @@
  * - All security features (quality, emergency, disputes, prize pools)
  */
 
-export const NETWORK = "testnet" as const;
+export const NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || "testnet";
 
 export const CONTRACT = {
   PACKAGE_ID:
     process.env.NEXT_PUBLIC_PACKAGE_ID,
+  SEAL_PACKAGE_ID:
+    process.env.NEXT_PUBLIC_SEAL_PACKAGE_ID || process.env.NEXT_PUBLIC_PACKAGE_ID,
   MODULE_NAME: "songsim",
   ACCESS_POLICY_MODULE: "access_policy",
   STAKING_MODULE: "staking",
@@ -77,7 +79,7 @@ export const REPUTATION = {
 } as const;
 
 export const RPC_ENDPOINTS = {
-  TESTNET: "https://fullnode.testnet.sui.io:443",
+  TESTNET: process.env.NEXT_PUBLIC_SUI_RPC_URL || "https://fullnode.testnet.sui.io:443",
 } as const;
 
 export const EXPLORER_URLS = {
@@ -102,11 +104,11 @@ export const TRANSACTION_TYPES = {
   DISTRIBUTE_PAYOUT: `${CONTRACT.PACKAGE_ID}::${CONTRACT.MODULE_NAME}::distribute_payout`,
 
   // Seal encryption access policy transactions
-  SEAL_REGISTER_TASK: `${CONTRACT.PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::register_task`,
-  SEAL_REGISTER_SUBMISSION: `${CONTRACT.PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::register_submission`,
-  SEAL_APPROVE_TASK: `${CONTRACT.PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_task`,
-  SEAL_APPROVE_SUBMISSION: `${CONTRACT.PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_submission`,
-  SEAL_APPROVE_PUBLIC: `${CONTRACT.PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_public`,
+  SEAL_REGISTER_TASK: `${CONTRACT.SEAL_PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::register_task`,
+  SEAL_REGISTER_SUBMISSION: `${CONTRACT.SEAL_PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::register_submission`,
+  SEAL_APPROVE_TASK: `${CONTRACT.SEAL_PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_task`,
+  SEAL_APPROVE_SUBMISSION: `${CONTRACT.SEAL_PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_submission`,
+  SEAL_APPROVE_PUBLIC: `${CONTRACT.SEAL_PACKAGE_ID}::${CONTRACT.ACCESS_POLICY_MODULE}::seal_approve_public`,
 } as const;
 
 // Event type definitions

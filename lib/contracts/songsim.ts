@@ -47,7 +47,7 @@ export const PLATFORM_CONFIG_ID =
 export const TASK_REGISTRY_ID = process.env.NEXT_PUBLIC_TASK_REGISTRY_ID || "";
 
 // Sui system constants
-const CLOCK_ID = "0x6" as const;
+export const CLOCK_ID = "0x6" as const;
 
 // User types from contract
 export const USER_TYPES = {
@@ -126,6 +126,7 @@ export function updateProfileTransaction(
       tx.pure.vector("u8", displayNameBytes),
       tx.pure.vector("u8", bioBytes),
       tx.pure.vector("u8", avatarUrlBytes),
+      tx.object(CLOCK_ID),
     ],
   });
 
@@ -143,7 +144,11 @@ export function updateUserTypeTransaction(
 
   tx.moveCall({
     target: `${PACKAGE_ID}::songsim::update_user_type`,
-    arguments: [tx.object(profileObjectId), tx.pure.u8(newUserType)],
+    arguments: [
+      tx.object(profileObjectId), 
+      tx.pure.u8(newUserType),
+      tx.object(CLOCK_ID),
+    ],
   });
 
   return tx;

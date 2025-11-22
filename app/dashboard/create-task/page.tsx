@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,7 +122,9 @@ export default function CreateTaskPage() {
             </p>
             {/* Wallet connect button is in navbar, so we just guide them */}
             <div className="p-4 bg-muted/30 rounded-lg border border-dashed">
-              <p className="text-sm">Use the Connect Button in the top right corner</p>
+              <p className="text-sm">
+                Use the Connect Button in the top right corner
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -165,11 +173,14 @@ export default function CreateTaskPage() {
     }
 
     // Validate deadline is at least 25 hours from now (24h buffer + 1h margin)
-    const deadlineTimestamp = new Date(taskData.deadline + "T23:59:59").getTime();
+    const deadlineTimestamp = new Date(
+      taskData.deadline + "T23:59:59"
+    ).getTime();
     const minDeadline = Date.now() + 25 * 60 * 60 * 1000; // 25 hours from now
     if (deadlineTimestamp < minDeadline) {
       toast.error("Invalid deadline", {
-        description: "Deadline must be at least 25 hours from now. Contract requires 24h review buffer.",
+        description:
+          "Deadline must be at least 25 hours from now. Contract requires 24h review buffer.",
       });
       return;
     }
@@ -317,12 +328,15 @@ export default function CreateTaskPage() {
           Upload Dataset
         </CardTitle>
         <CardDescription>
-          Upload the files you want labeled. We support images, text, audio, and video.
+          Upload the files you want labeled. We support images, text, audio, and
+          video.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <Label htmlFor="dataset" className="text-base font-medium">Dataset Files <span className="text-destructive">*</span></Label>
+          <Label htmlFor="dataset" className="text-base font-medium">
+            Dataset Files <span className="text-destructive">*</span>
+          </Label>
           <div className="mt-3 border-2 border-dashed border-primary/20 rounded-xl p-10 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group relative overflow-hidden">
             <input
               id="dataset"
@@ -335,7 +349,9 @@ export default function CreateTaskPage() {
               <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Upload className="h-8 w-8 text-primary" />
               </div>
-              <p className="text-lg font-medium group-hover:text-primary transition-colors">Click to upload files</p>
+              <p className="text-lg font-medium group-hover:text-primary transition-colors">
+                Click to upload files
+              </p>
               <p className="text-sm text-muted-foreground mt-2">
                 or drag and drop your dataset here
               </p>
@@ -354,7 +370,9 @@ export default function CreateTaskPage() {
                     className="text-sm text-muted-foreground flex items-center justify-between bg-background/50 p-2 rounded border"
                   >
                     <span className="truncate max-w-[80%]">{file.name}</span>
-                    <span className="text-xs font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span className="text-xs font-mono">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
                   </div>
                 ))}
               </div>
@@ -363,7 +381,9 @@ export default function CreateTaskPage() {
         </div>
 
         <div>
-          <Label htmlFor="description" className="text-base font-medium">Dataset Description <span className="text-destructive">*</span></Label>
+          <Label htmlFor="description" className="text-base font-medium">
+            Dataset Description <span className="text-destructive">*</span>
+          </Label>
           <Textarea
             id="description"
             placeholder="Describe your dataset (e.g., 'A collection of 500 street view images for object detection')..."
@@ -407,7 +427,9 @@ export default function CreateTaskPage() {
       <CardContent className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="title">Task Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="title">
+              Task Title <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="title"
               placeholder="e.g., Label cats and dogs in images"
@@ -422,16 +444,28 @@ export default function CreateTaskPage() {
           <div className="space-y-2">
             <Label>Task Type</Label>
             <div className="grid grid-cols-2 gap-2">
-              <div 
-                className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${taskData.taskType === 'image-classification' ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted/50'}`}
-                onClick={() => setTaskData({...taskData, taskType: 'image-classification'})}
+              <div
+                className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${
+                  taskData.taskType === "image-classification"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "hover:bg-muted/50"
+                }`}
+                onClick={() =>
+                  setTaskData({ ...taskData, taskType: "image-classification" })
+                }
               >
                 <ImageIcon className="h-4 w-4" />
                 <span className="text-sm font-medium">Image</span>
               </div>
-              <div 
-                className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${taskData.taskType === 'text-annotation' ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted/50'}`}
-                onClick={() => setTaskData({...taskData, taskType: 'text-annotation'})}
+              <div
+                className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-2 ${
+                  taskData.taskType === "text-annotation"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "hover:bg-muted/50"
+                }`}
+                onClick={() =>
+                  setTaskData({ ...taskData, taskType: "text-annotation" })
+                }
               >
                 <Type className="h-4 w-4" />
                 <span className="text-sm font-medium">Text</span>
@@ -441,7 +475,9 @@ export default function CreateTaskPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="task-description">Short Description <span className="text-destructive">*</span></Label>
+          <Label htmlFor="task-description">
+            Short Description <span className="text-destructive">*</span>
+          </Label>
           <Textarea
             id="task-description"
             placeholder="Briefly describe the task goal..."
@@ -455,7 +491,9 @@ export default function CreateTaskPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="instructions">Detailed Instructions <span className="text-destructive">*</span></Label>
+          <Label htmlFor="instructions">
+            Detailed Instructions <span className="text-destructive">*</span>
+          </Label>
           <Textarea
             id="instructions"
             placeholder="Provide detailed step-by-step instructions for labelers. Be specific about edge cases."
@@ -504,7 +542,8 @@ export default function CreateTaskPage() {
           <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="reward" className="flex items-center gap-2">
-                Reward per Item (SUI) <span className="text-destructive">*</span>
+                Reward per Item (SUI){" "}
+                <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -520,7 +559,9 @@ export default function CreateTaskPage() {
                   className="pl-9 focus-visible:ring-primary"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">Amount paid to each labeler per task item.</p>
+              <p className="text-xs text-muted-foreground">
+                Amount paid to each labeler per task item.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -541,13 +582,17 @@ export default function CreateTaskPage() {
                   className="pl-9 focus-visible:ring-primary"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">Total SUI to lock in the contract for this task.</p>
+              <p className="text-xs text-muted-foreground">
+                Total SUI to lock in the contract for this task.
+              </p>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="deadline">Deadline <span className="text-destructive">*</span></Label>
+              <Label htmlFor="deadline">
+                Deadline <span className="text-destructive">*</span>
+              </Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -560,10 +605,11 @@ export default function CreateTaskPage() {
                   className="pl-9 focus-visible:ring-primary"
                 />
               </div>
-              <Alert variant="warning" className="mt-2 py-2">
+              <Alert variant="default" className="mt-2 py-2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  Submissions close 24h before deadline for review. Set at least 25h from now.
+                  Submissions close 24h before deadline for review. Set at least
+                  25h from now.
                 </AlertDescription>
               </Alert>
             </div>
@@ -578,7 +624,10 @@ export default function CreateTaskPage() {
                   max="100"
                   value={taskData.minQualityScore}
                   onChange={(e) =>
-                    setTaskData({ ...taskData, minQualityScore: e.target.value })
+                    setTaskData({
+                      ...taskData,
+                      minQualityScore: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -590,7 +639,10 @@ export default function CreateTaskPage() {
                   min="1"
                   value={taskData.requiredLabelers}
                   onChange={(e) =>
-                    setTaskData({ ...taskData, requiredLabelers: e.target.value })
+                    setTaskData({
+                      ...taskData,
+                      requiredLabelers: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -641,17 +693,25 @@ export default function CreateTaskPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Files:</span>
-                  <span className="font-medium">{taskData.datasetFiles.length} file(s)</span>
+                  <span className="font-medium">
+                    {taskData.datasetFiles.length} file(s)
+                  </span>
                 </div>
                 {taskData.datasetFiles.length > 0 && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">First file:</span>
-                    <span className="font-medium truncate max-w-[150px]">{taskData.datasetFiles[0].name}</span>
+                    <span className="font-medium truncate max-w-[150px]">
+                      {taskData.datasetFiles[0].name}
+                    </span>
                   </div>
                 )}
                 <div className="pt-2 border-t mt-2">
-                  <span className="text-muted-foreground block mb-1">Description:</span>
-                  <p className="text-xs italic opacity-80">{taskData.datasetDescription}</p>
+                  <span className="text-muted-foreground block mb-1">
+                    Description:
+                  </span>
+                  <p className="text-xs italic opacity-80">
+                    {taskData.datasetDescription}
+                  </p>
                 </div>
               </div>
             </div>
@@ -667,7 +727,9 @@ export default function CreateTaskPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type:</span>
-                  <Badge variant="outline" className="capitalize">{taskData.taskType.replace('-', ' ')}</Badge>
+                  <Badge variant="outline" className="capitalize">
+                    {taskData.taskType.replace("-", " ")}
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -681,19 +743,29 @@ export default function CreateTaskPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Budget:</span>
-                  <span className="font-bold text-primary">{taskData.totalBudget} SUI</span>
+                  <span className="font-bold text-primary">
+                    {taskData.totalBudget} SUI
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Per Item:</span>
-                  <span className="font-medium">{taskData.rewardPerTask} SUI</span>
+                  <span className="font-medium">
+                    {taskData.rewardPerTask} SUI
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Required Labelers:</span>
-                  <span className="font-medium">{taskData.requiredLabelers}</span>
+                  <span className="text-muted-foreground">
+                    Required Labelers:
+                  </span>
+                  <span className="font-medium">
+                    {taskData.requiredLabelers}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Deadline:</span>
-                  <span className="font-medium">{new Date(taskData.deadline).toLocaleDateString()}</span>
+                  <span className="font-medium">
+                    {new Date(taskData.deadline).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -720,8 +792,8 @@ export default function CreateTaskPage() {
           <Button variant="outline" onClick={() => setCurrentStep(3)}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             disabled={isCreating}
             className="shadow-lg shadow-primary/20 min-w-[200px]"
           >
@@ -747,7 +819,9 @@ export default function CreateTaskPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Create New Task</h1>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Create New Task
+          </h1>
           <p className="text-muted-foreground mt-1">
             Upload your dataset and configure labeling requirements
           </p>
@@ -757,11 +831,11 @@ export default function CreateTaskPage() {
       {/* Progress Indicator */}
       <div className="relative">
         <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded-full z-0" />
-        <div 
-          className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full z-0 transition-all duration-500" 
+        <div
+          className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full z-0 transition-all duration-500"
           style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
         />
-        
+
         <div className="relative z-10 flex justify-between">
           {[1, 2, 3, 4].map((step) => (
             <div key={step} className="flex flex-col items-center gap-2">
@@ -772,9 +846,17 @@ export default function CreateTaskPage() {
                     : "bg-muted border-background text-muted-foreground"
                 }`}
               >
-                {step >= currentStep ? step : <CheckCircle className="h-5 w-5" />}
+                {step >= currentStep ? (
+                  step
+                ) : (
+                  <CheckCircle className="h-5 w-5" />
+                )}
               </div>
-              <span className={`text-xs font-medium transition-colors duration-300 ${currentStep >= step ? "text-primary" : "text-muted-foreground"}`}>
+              <span
+                className={`text-xs font-medium transition-colors duration-300 ${
+                  currentStep >= step ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
                 {step === 1 && "Dataset"}
                 {step === 2 && "Details"}
                 {step === 3 && "Bounty"}

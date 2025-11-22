@@ -2,7 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -210,7 +216,11 @@ export default function LeaderboardPage() {
           3rd Place
         </Badge>
       );
-    return <span className="text-muted-foreground font-mono font-medium">#{rank}</span>;
+    return (
+      <span className="text-muted-foreground font-mono font-medium">
+        #{rank}
+      </span>
+    );
   };
 
   const renderLeaderboard = (
@@ -248,7 +258,9 @@ export default function LeaderboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-lg">
                 <div>
-                  <div className="font-semibold">{entries[1].tasksCompleted}</div>
+                  <div className="font-semibold">
+                    {entries[1].tasksCompleted}
+                  </div>
                   <p className="text-xs text-muted-foreground">Tasks</p>
                 </div>
                 <div>
@@ -279,7 +291,7 @@ export default function LeaderboardPage() {
               <div className="flex justify-center mb-2">
                 <UserDisplay
                   address={entries[0].address}
-                  size="xl"
+                  size="lg"
                   showAddress={false}
                   className="ring-4 ring-yellow-500/30 shadow-lg shadow-yellow-500/20"
                 />
@@ -296,11 +308,17 @@ export default function LeaderboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm bg-yellow-500/5 p-3 rounded-xl border border-yellow-500/10">
                 <div>
-                  <div className="font-bold text-lg">{entries[0].tasksCompleted}</div>
-                  <p className="text-xs text-muted-foreground">Tasks Completed</p>
+                  <div className="font-bold text-lg">
+                    {entries[0].tasksCompleted}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Tasks Completed
+                  </p>
                 </div>
                 <div>
-                  <div className="font-bold text-lg">{entries[0].accuracy}%</div>
+                  <div className="font-bold text-lg">
+                    {entries[0].accuracy}%
+                  </div>
                   <p className="text-xs text-muted-foreground">Accuracy Rate</p>
                 </div>
               </div>
@@ -344,7 +362,9 @@ export default function LeaderboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-lg">
                 <div>
-                  <div className="font-semibold">{entries[2].tasksCompleted}</div>
+                  <div className="font-semibold">
+                    {entries[2].tasksCompleted}
+                  </div>
                   <p className="text-xs text-muted-foreground">Tasks</p>
                 </div>
                 <div>
@@ -385,7 +405,9 @@ export default function LeaderboardPage() {
               <div className="col-span-5 md:col-span-4">User</div>
               <div className="col-span-2 text-right hidden md:block">Score</div>
               <div className="col-span-2 text-right">Tasks</div>
-              <div className="col-span-2 text-right hidden md:block">Accuracy</div>
+              <div className="col-span-2 text-right hidden md:block">
+                Accuracy
+              </div>
               <div className="col-span-2 md:col-span-1 text-right">Earned</div>
             </div>
             {entries.slice(3).map((entry) => (
@@ -394,7 +416,9 @@ export default function LeaderboardPage() {
                 className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/40 transition-colors border-b last:border-0 items-center group"
               >
                 <div className="col-span-1 flex justify-center">
-                  <span className="font-mono text-muted-foreground font-medium group-hover:text-foreground transition-colors">#{entry.rank}</span>
+                  <span className="font-mono text-muted-foreground font-medium group-hover:text-foreground transition-colors">
+                    #{entry.rank}
+                  </span>
                 </div>
                 <div className="col-span-5 md:col-span-4 flex items-center">
                   <UserDisplay
@@ -412,7 +436,7 @@ export default function LeaderboardPage() {
                 <div className="col-span-2 text-right hidden md:block text-muted-foreground">
                   {entry.accuracy}%
                 </div>
-                 <div className="col-span-2 md:col-span-1 text-right font-medium text-primary">
+                <div className="col-span-2 md:col-span-1 text-right font-medium text-primary">
                   {entry.totalEarned}
                 </div>
               </div>
@@ -435,7 +459,10 @@ export default function LeaderboardPage() {
         {/* Header */}
         <div className="text-center space-y-4 relative">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/20 blur-[100px] rounded-full -z-10 pointer-events-none" />
-          <Badge variant="outline" className="py-1 px-4 rounded-full border-primary/30 bg-primary/5 text-primary mb-4">
+          <Badge
+            variant="outline"
+            className="py-1 px-4 rounded-full border-primary/30 bg-primary/5 text-primary mb-4"
+          >
             <Zap className="h-3 w-3 mr-2 fill-primary" />
             Live Rankings
           </Badge>
@@ -443,7 +470,7 @@ export default function LeaderboardPage() {
             Leaderboard
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Celebrating the top performers in the Songsim Label community. 
+            Celebrating the top performers in the Songsim Label community.
             Compete for reputation, rewards, and glory.
           </p>
         </div>
@@ -552,14 +579,24 @@ export default function LeaderboardPage() {
             </div>
 
             {/* Leaderboard Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="space-y-8"
+            >
               <div className="flex justify-center">
                 <TabsList className="grid w-full max-w-md grid-cols-2 p-1 bg-muted/50 rounded-xl">
-                  <TabsTrigger value="labelers" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">
+                  <TabsTrigger
+                    value="labelers"
+                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Top Labelers
                   </TabsTrigger>
-                  <TabsTrigger value="requesters" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all">
+                  <TabsTrigger
+                    value="requesters"
+                    className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all"
+                  >
                     <Star className="h-4 w-4 mr-2" />
                     Top Requesters
                   </TabsTrigger>

@@ -46,7 +46,8 @@ export default function QualityPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">Connect Wallet</h3>
             <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-              Connect your wallet to view your personalized quality metrics and reputation score.
+              Connect your wallet to view your personalized quality metrics and
+              reputation score.
             </p>
           </CardContent>
         </Card>
@@ -74,14 +75,22 @@ export default function QualityPage() {
   const badge = getQualityBadge(stats.reputationScore);
 
   // Calculate percentage breakdowns based on acceptance rate
-  const acceptancePercent = stats.totalSubmissions > 0 ? (stats.acceptedCount / stats.totalSubmissions) * 100 : 0;
-  const rejectionPercent = stats.totalSubmissions > 0 ? (stats.rejectedCount / stats.totalSubmissions) * 100 : 0;
+  const acceptancePercent =
+    stats.totalSubmissions > 0
+      ? (stats.acceptedCount / stats.totalSubmissions) * 100
+      : 0;
+  const rejectionPercent =
+    stats.totalSubmissions > 0
+      ? (stats.rejectedCount / stats.totalSubmissions) * 100
+      : 0;
 
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-8 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Quality Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          Quality Dashboard
+        </h1>
         <p className="text-muted-foreground text-lg">
           Track your work quality, reputation score, and performance metrics.
         </p>
@@ -91,8 +100,9 @@ export default function QualityPage() {
       <Alert className="bg-primary/5 border-primary/20 text-primary">
         <Info className="h-4 w-4" />
         <AlertDescription className="ml-2">
-          Quality scores are assigned by task requesters after reviewing your submissions. 
-          Higher scores boost your reputation and increase future earning potential.
+          Quality scores are assigned by task requesters after reviewing your
+          submissions. Higher scores boost your reputation and increase future
+          earning potential.
         </AlertDescription>
       </Alert>
 
@@ -107,16 +117,23 @@ export default function QualityPage() {
               Active Status
             </Badge>
           </CardTitle>
-          <CardDescription>Based on {stats.totalSubmissions} total submissions</CardDescription>
+          <CardDescription>
+            Based on {stats.totalSubmissions} total submissions
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <div className="flex-1 w-full text-center md:text-left">
               <div className="flex items-baseline justify-center md:justify-start gap-2 mb-2">
-                <span className="text-7xl font-bold tracking-tighter" style={{ color: getQualityColor(stats.reputationScore) }}>
+                <span
+                  className="text-7xl font-bold tracking-tighter"
+                  style={{ color: getQualityColor(stats.reputationScore) }}
+                >
                   {stats.reputationScore.toFixed(1)}
                 </span>
-                <span className="text-2xl text-muted-foreground font-light">/100</span>
+                <span className="text-2xl text-muted-foreground font-light">
+                  /100
+                </span>
               </div>
               <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
                 <Badge
@@ -126,15 +143,25 @@ export default function QualityPage() {
                   {badge.emoji} {badge.label}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {stats.reputationScore >= 90 ? "Excellent" : stats.reputationScore >= 70 ? "Good" : "Needs Improvement"}
+                  {stats.reputationScore >= 90
+                    ? "Excellent"
+                    : stats.reputationScore >= 70
+                    ? "Good"
+                    : "Needs Improvement"}
                 </span>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Progress to next tier</span>
-                  <span>{Math.min(100, stats.reputationScore + 15).toFixed(0)} target</span>
+                  <span>
+                    {Math.min(100, stats.reputationScore + 15).toFixed(0)}{" "}
+                    target
+                  </span>
                 </div>
-                <Progress value={stats.reputationScore} className="h-3 bg-muted/50" indicatorClassName={`bg-${badge.color}-600`} />
+                <Progress
+                  value={stats.reputationScore}
+                  className="h-3 bg-muted/50"
+                />
               </div>
             </div>
 
@@ -147,25 +174,39 @@ export default function QualityPage() {
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                     Accepted Submissions
                   </span>
-                  <span className="text-sm font-bold">{stats.acceptedCount}</span>
+                  <span className="text-sm font-bold">
+                    {stats.acceptedCount}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Progress value={acceptancePercent} className="h-2 bg-muted/50" indicatorClassName="bg-green-500" />
-                  <span className="text-xs font-medium w-10 text-right text-muted-foreground">{acceptancePercent.toFixed(0)}%</span>
+                  <Progress
+                    value={acceptancePercent}
+                    className="h-2 bg-muted/50"
+                  />
+                  <span className="text-xs font-medium w-10 text-right text-muted-foreground">
+                    {acceptancePercent.toFixed(0)}%
+                  </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium flex items-center gap-2">
                     <XCircle className="h-4 w-4 text-red-500" />
                     Rejected Submissions
                   </span>
-                  <span className="text-sm font-bold">{stats.rejectedCount}</span>
+                  <span className="text-sm font-bold">
+                    {stats.rejectedCount}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Progress value={rejectionPercent} className="h-2 bg-muted/50" indicatorClassName="bg-red-500" />
-                  <span className="text-xs font-medium w-10 text-right text-muted-foreground">{rejectionPercent.toFixed(0)}%</span>
+                  <Progress
+                    value={rejectionPercent}
+                    className="h-2 bg-muted/50"
+                  />
+                  <span className="text-xs font-medium w-10 text-right text-muted-foreground">
+                    {rejectionPercent.toFixed(0)}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -201,9 +242,7 @@ export default function QualityPage() {
             <p className="text-3xl font-bold text-green-600">
               {acceptancePercent.toFixed(0)}%
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Accepted work
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Accepted work</p>
           </CardContent>
         </Card>
 
@@ -233,7 +272,11 @@ export default function QualityPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-purple-600">
-              {stats.reputationScore >= 90 ? "Top 10%" : stats.reputationScore >= 75 ? "Top 30%" : "Active"}
+              {stats.reputationScore >= 90
+                ? "Top 10%"
+                : stats.reputationScore >= 75
+                ? "Top 30%"
+                : "Active"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Among all labelers
@@ -271,29 +314,44 @@ export default function QualityPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="p-4 rounded-xl bg-muted/30 border text-center hover:bg-muted/50 transition-colors">
-                    <p className="text-3xl font-bold text-foreground">{stats.totalSubmissions}</p>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1 font-medium">Total</p>
+                    <p className="text-3xl font-bold text-foreground">
+                      {stats.totalSubmissions}
+                    </p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1 font-medium">
+                      Total
+                    </p>
                   </div>
                   <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10 text-center hover:bg-green-500/10 transition-colors">
-                    <p className="text-3xl font-bold text-green-600">{stats.acceptedCount}</p>
-                    <p className="text-xs text-green-600/80 uppercase tracking-wider mt-1 font-medium">Accepted</p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {stats.acceptedCount}
+                    </p>
+                    <p className="text-xs text-green-600/80 uppercase tracking-wider mt-1 font-medium">
+                      Accepted
+                    </p>
                   </div>
                   <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-center hover:bg-red-500/10 transition-colors">
-                    <p className="text-3xl font-bold text-red-600">{stats.rejectedCount}</p>
-                    <p className="text-xs text-red-600/80 uppercase tracking-wider mt-1 font-medium">Rejected</p>
+                    <p className="text-3xl font-bold text-red-600">
+                      {stats.rejectedCount}
+                    </p>
+                    <p className="text-xs text-red-600/80 uppercase tracking-wider mt-1 font-medium">
+                      Rejected
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="p-5 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
                   <div className="flex items-start gap-4">
                     <div className="p-2 bg-background rounded-full shadow-sm">
                       <Award className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-foreground">Reputation Score: {stats.reputationScore.toFixed(1)}/100</h4>
+                      <h4 className="font-bold text-foreground">
+                        Reputation Score: {stats.reputationScore.toFixed(1)}/100
+                      </h4>
                       <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                        Your reputation is calculated from your acceptance rate and task quality. 
-                        Maintain high-quality work to improve your score and unlock better opportunities.
+                        Your reputation is calculated from your acceptance rate
+                        and task quality. Maintain high-quality work to improve
+                        your score and unlock better opportunities.
                       </p>
                     </div>
                   </div>
@@ -318,31 +376,41 @@ export default function QualityPage() {
                 <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 </div>
-                <span className="text-sm text-muted-foreground">Carefully read all task instructions before starting</span>
+                <span className="text-sm text-muted-foreground">
+                  Carefully read all task instructions before starting
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 </div>
-                <span className="text-sm text-muted-foreground">Double-check your work for accuracy and completeness</span>
+                <span className="text-sm text-muted-foreground">
+                  Double-check your work for accuracy and completeness
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 </div>
-                <span className="text-sm text-muted-foreground">Follow formatting guidelines provided by the requester</span>
+                <span className="text-sm text-muted-foreground">
+                  Follow formatting guidelines provided by the requester
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 </div>
-                <span className="text-sm text-muted-foreground">Ask questions if instructions are unclear</span>
+                <span className="text-sm text-muted-foreground">
+                  Ask questions if instructions are unclear
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="mt-0.5 h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 </div>
-                <span className="text-sm text-muted-foreground">Submit work before the deadline to avoid rushed mistakes</span>
+                <span className="text-sm text-muted-foreground">
+                  Submit work before the deadline to avoid rushed mistakes
+                </span>
               </li>
             </ul>
           </CardContent>

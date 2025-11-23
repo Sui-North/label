@@ -60,12 +60,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Coins className="h-5 w-5" />,
     roles: ["requester", "labeler", "both"],
   },
-  {
-    title: "Staking",
-    href: "/dashboard/staking",
-    icon: <Shield className="h-5 w-5" />,
-    roles: ["labeler", "both"],
-  },
+  // TODO: Implement staking feature in future iterations
+  // {
+  //   title: "Staking",
+  //   href: "/dashboard/staking",
+  //   icon: <Shield className="h-5 w-5" />,
+  //   roles: ["labeler", "both"],
+  // },
   {
     title: "Quality",
     href: "/dashboard/quality",
@@ -461,7 +462,9 @@ export default function DashboardLayout({
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-64 bg-linear-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
 
-        <div className="container mx-auto p-6 md:p-8 max-w-7xl w-full">{children}</div>
+        <div className="container mx-auto p-6 md:p-8 max-w-7xl w-full">
+          {children}
+        </div>
       </main>
     </div>
   );

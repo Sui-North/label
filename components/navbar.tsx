@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
 import { ThemeToggle } from "./theme-toggle";
@@ -58,10 +59,26 @@ export function Navbar() {
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold text-xl bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+            className="flex items-center gap-2"
           >
-            <Tag className="h-6 w-6 text-blue-600" />
-            Songsim Label
+            {/* Vertical logo for small screens */}
+            <Image
+              src="/sl-logo-vertical.png"
+              alt="Songsim Label"
+              width={120}
+              height={40}
+              className="md:hidden"
+              priority
+            />
+            {/* Horizontal logo for larger screens */}
+            <Image
+              src="/sl-logo-horizontal.png"
+              alt="Songsim Label"
+              width={160}
+              height={40}
+              className="hidden md:block"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -92,10 +109,15 @@ export function Navbar() {
                 <div className="flex flex-col gap-4 mt-8">
                   <Link
                     href="/"
-                    className="flex items-center gap-2 font-bold text-xl bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
+                    className="flex items-center gap-2 mb-4"
                   >
-                    <Tag className="h-6 w-6 text-blue-600" />
-                    Songsim Label
+                    <Image
+                      src="/sl-logo-vertical.png"
+                      alt="Songsim Label"
+                      width={160}
+                      height={40}
+                      priority
+                    />
                   </Link>
                   <Button variant="ghost" asChild className="justify-start">
                     <Link href="/tasks">

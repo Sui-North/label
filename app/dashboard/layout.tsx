@@ -124,9 +124,15 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const account = useCurrentAccount();
   const { data: profile, isLoading, isError } = useUserProfile();
-  const [userRole, setUserRole] = useState<UserRole>("both");
-  const [hasCheckedProfile, setHasCheckedProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Derive user role from profile data instead of using state
+  const userRole: UserRole =
+    profile?.userType === 1
+      ? "requester"
+      : profile?.userType === 2
+      ? "labeler"
+      : "both";
 
   // Add navigation loader wrapped in Suspense
   const navigationLoader = (
@@ -145,11 +151,8 @@ export default function DashboardLayout({
   useEffect(() => {
     // Only redirect after we've actually loaded and confirmed no profile
     if (isLoading) {
-      setHasCheckedProfile(false);
       return;
     }
-
-    setHasCheckedProfile(true);
 
     // Only redirect if we've confirmed there's an error or no profile after loading
     if (!isLoading && (isError || !profile)) {
@@ -159,20 +162,6 @@ export default function DashboardLayout({
         router.replace("/auth");
       }, 100);
       return () => clearTimeout(timer);
-    }
-
-    // Map user_type to role
-    if (profile) {
-      const userType = profile.userType;
-      if (userType === 1) {
-        setUserRole("requester");
-      } else if (userType === 2) {
-        setUserRole("labeler");
-      } else if (userType === 3) {
-        setUserRole("both");
-      } else {
-        setUserRole("both");
-      }
     }
   }, [profile, isLoading, isError, router]);
 
@@ -223,7 +212,7 @@ export default function DashboardLayout({
       {navigationLoader}
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 border-b bg-background/80 backdrop-blur-xl z-30 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2 font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="flex items-center gap-2 font-bold text-lg bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Songsim Label
         </div>
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>

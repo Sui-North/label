@@ -15,7 +15,7 @@ export function useNavigationLoader() {
 
   useEffect(() => {
     const loadingKey = "navigation";
-    
+
     // Start loading when navigation begins
     startLoading(loadingKey);
     updateProgress(loadingKey, 30);

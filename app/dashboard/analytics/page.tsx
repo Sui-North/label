@@ -82,7 +82,9 @@ export default function AnalyticsPage() {
     <div className="container mx-auto p-6 max-w-7xl space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Analytics</h1>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            Analytics
+          </h1>
           <p className="text-muted-foreground mt-1">
             Track your performance and insights
           </p>
@@ -99,22 +101,34 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue={showRequesterAnalytics ? "requester" : "labeler"} className="space-y-6">
+      <Tabs
+        defaultValue={showRequesterAnalytics ? "requester" : "labeler"}
+        className="space-y-6"
+      >
         <TabsList className="bg-muted/50 p-1 rounded-xl w-full md:w-auto grid grid-cols-2 md:inline-flex">
           {showRequesterAnalytics && (
-            <TabsTrigger value="requester" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="requester"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
               Requester Analytics
             </TabsTrigger>
           )}
           {showLabelerAnalytics && (
-            <TabsTrigger value="labeler" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger
+              value="labeler"
+              className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
               Labeler Analytics
             </TabsTrigger>
           )}
         </TabsList>
 
         {showRequesterAnalytics && (
-          <TabsContent value="requester" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <TabsContent
+            value="requester"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
+          >
             {/* Requester Overview */}
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="glass-card hover:shadow-lg transition-all duration-300 border-primary/20 bg-primary/5">
@@ -220,8 +234,8 @@ export default function AnalyticsPage() {
                             {stat.month}
                           </div>
                           <div className="h-2 w-24 bg-secondary rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-primary rounded-full" 
+                            <div
+                              className="h-full bg-primary rounded-full"
                               style={{ width: `${(stat.spent / 50) * 100}%` }}
                             />
                           </div>
@@ -271,11 +285,15 @@ export default function AnalyticsPage() {
                         className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50"
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-xs ${
-                            idx === 0 ? "bg-yellow-500/20 text-yellow-600" : 
-                            idx === 1 ? "bg-gray-400/20 text-gray-500" : 
-                            "bg-orange-400/20 text-orange-600"
-                          }`}>
+                          <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-xs ${
+                              idx === 0
+                                ? "bg-yellow-500/20 text-yellow-600"
+                                : idx === 1
+                                ? "bg-gray-400/20 text-gray-500"
+                                : "bg-orange-400/20 text-orange-600"
+                            }`}
+                          >
                             {idx + 1}
                           </div>
                           <div>
@@ -289,7 +307,9 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="flex items-center gap-1 bg-background/50 px-2 py-1 rounded-md border shadow-sm">
                           <Award className="h-3 w-3 text-yellow-500" />
-                          <span className="font-bold text-sm">{labeler.rating}</span>
+                          <span className="font-bold text-sm">
+                            {labeler.rating}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -301,7 +321,10 @@ export default function AnalyticsPage() {
         )}
 
         {showLabelerAnalytics && (
-          <TabsContent value="labeler" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <TabsContent
+            value="labeler"
+            className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
+          >
             {/* Labeler Overview */}
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="glass-card hover:shadow-lg transition-all duration-300 border-primary/20 bg-primary/5">
@@ -355,7 +378,9 @@ export default function AnalyticsPage() {
                   <div className="text-2xl font-bold">
                     {analyticsData.labeler.reputationScore}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Out of 1000</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Out of 1000
+                  </p>
                 </CardContent>
               </Card>
 
@@ -372,7 +397,9 @@ export default function AnalyticsPage() {
                   <div className="text-2xl font-bold">
                     {analyticsData.labeler.acceptanceRate}%
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Quality score</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Quality score
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -403,8 +430,8 @@ export default function AnalyticsPage() {
                             {stat.month}
                           </div>
                           <div className="h-2 w-24 bg-secondary rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-green-500 rounded-full" 
+                            <div
+                              className="h-full bg-green-500 rounded-full"
                               style={{ width: `${(stat.earned / 80) * 100}%` }}
                             />
                           </div>
@@ -448,35 +475,40 @@ export default function AnalyticsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analyticsData.labeler.topRequesters.map((requester, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-xs ${
-                            idx === 0 ? "bg-primary/20 text-primary" : 
-                            "bg-muted text-muted-foreground"
-                          }`}>
-                            {idx + 1}
+                    {analyticsData.labeler.topRequesters.map(
+                      (requester, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/50"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-xs ${
+                                idx === 0
+                                  ? "bg-primary/20 text-primary"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <div className="font-mono text-sm font-medium">
+                                {requester.address}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {requester.tasks} tasks completed
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="font-mono text-sm font-medium">
-                              {requester.address}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {requester.tasks} tasks completed
-                            </div>
+                          <div className="flex items-center gap-1 bg-background/50 px-2 py-1 rounded-md border shadow-sm">
+                            <DollarSign className="h-3 w-3 text-green-500" />
+                            <span className="font-bold text-sm">
+                              {requester.avgPay}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-background/50 px-2 py-1 rounded-md border shadow-sm">
-                          <DollarSign className="h-3 w-3 text-green-500" />
-                          <span className="font-bold text-sm">
-                            {requester.avgPay}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </CardContent>
               </Card>

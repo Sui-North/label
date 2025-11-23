@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
 import Link from "next/link";
@@ -110,6 +110,11 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+function NavigationLoader() {
+  useNavigationLoader();
+  return null;
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -123,8 +128,12 @@ export default function DashboardLayout({
   const [hasCheckedProfile, setHasCheckedProfile] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Add navigation loader
-  useNavigationLoader();
+  // Add navigation loader wrapped in Suspense
+  const navigationLoader = (
+    <Suspense fallback={null}>
+      <NavigationLoader />
+    </Suspense>
+  );
 
   useEffect(() => {
     if (!account) {
@@ -211,6 +220,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-muted/10">
+      {navigationLoader}
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 border-b bg-background/80 backdrop-blur-xl z-30 flex items-center justify-between px-4">
         <div className="flex items-center gap-2 font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -247,9 +257,10 @@ export default function DashboardLayout({
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-semibold truncate">
                       {profile?.displayName ||
-                        `${account?.address.slice(0, 6)}...${account?.address.slice(
-                          -4
-                        )}`}
+                        `${account?.address.slice(
+                          0,
+                          6
+                        )}...${account?.address.slice(-4)}`}
                     </p>
                     <div className="flex items-center text-xs text-muted-foreground">
                       <div className="h-1.5 w-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse" />
@@ -284,12 +295,21 @@ export default function DashboardLayout({
                         )}
                       >
                         <div className="flex items-center">
-                          <span className={cn("mr-3 transition-colors", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")}>
+                          <span
+                            className={cn(
+                              "mr-3 transition-colors",
+                              isActive
+                                ? "text-primary-foreground"
+                                : "text-muted-foreground group-hover:text-primary"
+                            )}
+                          >
                             {item.icon}
                           </span>
                           {item.title}
                         </div>
-                        {isActive && <ChevronRight className="h-4 w-4 opacity-50" />}
+                        {isActive && (
+                          <ChevronRight className="h-4 w-4 opacity-50" />
+                        )}
                       </Link>
                     );
                   })}
@@ -299,12 +319,18 @@ export default function DashboardLayout({
               {/* Bottom Actions */}
               <div className="p-4 border-t border-border/50 bg-muted/5 space-y-2 shrink-0">
                 <div className="flex items-center justify-between px-2 mb-2">
-                  <span className="text-xs text-muted-foreground font-medium">Theme</span>
+                  <span className="text-xs text-muted-foreground font-medium">
+                    Theme
+                  </span>
                   <ThemeToggle />
                 </div>
-                
+
                 {userRole === "both" && (
-                  <Button variant="ghost" className="w-full justify-start hover:bg-background" asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start hover:bg-background"
+                    asChild
+                  >
                     <Link href="/settings">
                       <Settings className="h-4 w-4 mr-2" />
                       Settings
@@ -390,7 +416,14 @@ export default function DashboardLayout({
                   )}
                 >
                   <div className="flex items-center">
-                    <span className={cn("mr-3 transition-colors", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")}>
+                    <span
+                      className={cn(
+                        "mr-3 transition-colors",
+                        isActive
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground group-hover:text-primary"
+                      )}
+                    >
                       {item.icon}
                     </span>
                     {item.title}
@@ -405,12 +438,18 @@ export default function DashboardLayout({
         {/* Bottom Actions - Fixed at bottom */}
         <div className="p-4 border-t border-border/50 bg-muted/5 space-y-2 shrink-0">
           <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-xs text-muted-foreground font-medium">Theme</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              Theme
+            </span>
             <ThemeToggle />
           </div>
-          
+
           {userRole === "both" && (
-            <Button variant="ghost" className="w-full justify-start hover:bg-background" asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-start hover:bg-background"
+              asChild
+            >
               <Link href="/settings">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -432,10 +471,8 @@ export default function DashboardLayout({
       <main className="flex-1 overflow-auto relative pt-16 md:pt-0">
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-64 bg-linear-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
-        
-        <div className="container mx-auto p-6 md:p-8 max-w-7xl">
-          {children}
-        </div>
+
+        <div className="container mx-auto p-6 md:p-8 max-w-7xl">{children}</div>
       </main>
     </div>
   );

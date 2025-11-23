@@ -137,9 +137,25 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
+  
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  /* Ensure images and containers don't overflow */
+  img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
   }
 }
 

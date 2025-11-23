@@ -18,14 +18,20 @@ export const metadata: Metadata = {
     "AI training data annotation marketplace on Sui blockchain. Fair, transparent, and community-driven.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
+      <body className={`${inter.variable} font-sans antialiased overflow-x-hidden`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -46,8 +46,7 @@ export default function HomePage() {
   const totalSubmissions = submissions?.length || 0;
 
   return (
-    <>
-
+    <div className="overflow-x-hidden">
       <Navbar />
       <div className="relative overflow-hidden">
         {/* Ambient Background Glow */}
@@ -60,7 +59,7 @@ export default function HomePage() {
 
         <section className="py-24 relative">
           <ParticleField />
-          <div className="container px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-2xl text-center mb-16">
               <h2 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
                 Why Choose <span className="text-gradient">Songsim Label</span>?
@@ -154,7 +153,7 @@ export default function HomePage() {
 
         {/* How It Works - Requesters */}
         <section className="py-24 relative bg-muted/30">
-          <div className="container px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn className="mx-auto max-w-6xl">
               <div className="text-center mb-16">
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
@@ -220,7 +219,7 @@ export default function HomePage() {
         <section className="py-20 relative overflow-hidden">
            <ActiveGrid />
            <div className="absolute inset-0 bg-primary/5" />
-           <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
+           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
             <FadeIn className="mx-auto max-w-2xl text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
                 Platform Statistics
@@ -266,7 +265,7 @@ export default function HomePage() {
         {/* CTA Section */}
         <section className="py-24 relative overflow-hidden">
           <EnergyWaves />
-          <div className="container px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
             <FadeIn>
               <div className="glass-card rounded-3xl p-8 md:p-16 text-center max-w-4xl mx-auto border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-primary/10 to-transparent -z-10" />
@@ -308,7 +307,7 @@ export default function HomePage() {
 
         {/* Footer */}
         <footer className="border-t py-12 bg-muted/30">
-          <div className="container px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-8 md:grid-cols-4">
               <div>
                 <h3 className="font-bold mb-4 text-lg">Songsim Label</h3>
@@ -396,6 +395,6 @@ export default function HomePage() {
           </div>
         </footer>
       </div>
-    </>
+    </div>
   );
 }

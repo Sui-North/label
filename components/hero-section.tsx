@@ -33,11 +33,11 @@ export function HeroSection() {
   const { resolvedTheme } = useTheme();
   
   return (
-    <section className="relative overflow-hidden min-h-[90vh] flex items-center">
+    <section className="relative overflow-hidden min-h-[70vh] sm:min-h-[80vh] lg:min-h-[90vh] flex items-center">
       <Hero3DScene />
 
-      <div className="container relative z-10 py-20 md:py-32 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <div className="container mx-auto max-w-7xl relative z-10 py-12 sm:py-20 md:py-32 px-4 sm:px-6 lg:px-8">
+        <div className="w-full">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             {/* Text Content - Left Side */}
             <div className="flex-1 text-center lg:text-left">
@@ -61,11 +61,11 @@ export function HeroSection() {
               </FadeIn>
 
               <FadeIn delay={0.1}>
-                <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-                  <span className="block bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  <span className="block bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent wrap-break-word">
                     Build Better AI
                   </span>
-                  <span className="block text-foreground mt-2">
+                  <span className="block text-foreground mt-2 wrap-break-word">
                     With Web3 Data Labeling
                   </span>
                 </h1>
@@ -103,7 +103,7 @@ export function HeroSection() {
             </div>
 
             {/* 3D Data Core - Right Side */}
-            <FadeIn delay={0.4} className="flex-1 w-full lg:w-auto min-h-[300px] lg:min-h-0 relative">
+            <FadeIn delay={0.4} className="flex-1 w-full lg:w-auto h-[250px] sm:h-[350px] md:h-[400px] lg:min-h-0 relative">
               <DataCoreCanvas />
             </FadeIn>
           </div>

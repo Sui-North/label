@@ -208,7 +208,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/10">
+    <div className="flex h-screen overflow-hidden overflow-x-hidden bg-muted/10">
       {navigationLoader}
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 border-b bg-background/80 backdrop-blur-xl z-30 flex items-center justify-between px-4">
@@ -457,11 +457,11 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto relative pt-16 md:pt-0">
+      <main className="flex-1 overflow-auto overflow-x-hidden relative pt-16 md:pt-0">
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-64 bg-linear-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
 
-        <div className="container mx-auto p-6 md:p-8 max-w-7xl">{children}</div>
+        <div className="container mx-auto p-6 md:p-8 max-w-7xl w-full">{children}</div>
       </main>
     </div>
   );

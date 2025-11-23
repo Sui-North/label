@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { LoadingProvider } from "@/contexts/loading-context";
 import GlobalLoader from "@/components/global-loader";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,6 +42,7 @@ export default function RootLayout({
           <LoadingProvider>
             <Providers>
               <GlobalLoader />
+              <Toaster richColors position="top-right" />
               <main className="min-h-screen">{children}</main>
             </Providers>
           </LoadingProvider>

@@ -49,6 +49,7 @@ import {
 import { UserDisplay } from "@/components/user-display";
 import { downloadFromWalrus } from "@/lib/walrus";
 import { Navbar } from "@/components/navbar";
+import { submissionToasts, uploadToasts, systemToasts } from "@/lib/toast-notifications";
 
 export default function TaskDetailPage() {
   const params = useParams();
@@ -79,6 +80,7 @@ export default function TaskDetailPage() {
     if (file) {
       // Validate file size (max 50MB)
       if (file.size > 50 * 1024 * 1024) {
+        uploadToasts.fileTooLarge("50MB");
         setError("Result file must be less than 50MB");
         return;
       }
@@ -94,6 +96,7 @@ export default function TaskDetailPage() {
     setError("");
     setSuccess("");
     setUploadProgress(0);
+    submissionToasts.submitStart();
 
     try {
       // Upload result file to Walrus
@@ -110,6 +113,7 @@ export default function TaskDetailPage() {
 
       // Check contract configuration
       if (!TASK_REGISTRY_ID) {
+        systemToasts.configError();
         setError("Contract not properly configured. Please contact support.");
         setIsSubmitting(false);
         return;
@@ -144,6 +148,7 @@ export default function TaskDetailPage() {
           onSuccess: (result) => {
             console.log("Labels submitted successfully:", result);
             setUploadProgress(100);
+            submissionToasts.submitSuccess(task.title);
             setSuccess(
               "Your submission has been sent successfully! The requester will review it."
             );
@@ -165,6 +170,14 @@ export default function TaskDetailPage() {
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
+            
+            // Check if it's a deadline error (error code 29 from Move contract)
+            if (error.message.includes("MoveAbort") && error.message.includes("29")) {
+              submissionToasts.deadlinePassed();
+            } else {
+              submissionToasts.submitError(error.message);
+            }
+            
             setError(`Failed to submit labels: ${error.message}`);
             setIsSubmitting(false);
             setUploadProgress(0);

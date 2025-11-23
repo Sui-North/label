@@ -4,6 +4,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSuiClient, useCurrentAccount } from "@mysten/dapp-kit";
+import { taskToasts, systemToasts } from "@/lib/toast-notifications";
 import {
   getAllTasks,
   TASK_REGISTRY_ID,
@@ -74,11 +75,17 @@ export function useAllTasks() {
     queryKey: ["allTasks"],
     queryFn: async () => {
       if (!TASK_REGISTRY_ID) {
+        systemToasts.configError();
         return [];
       }
 
-      const tasks = await getAllTasks(client, TASK_REGISTRY_ID);
-      return tasks.map(processTaskData);
+      try {
+        const tasks = await getAllTasks(client, TASK_REGISTRY_ID);
+        return tasks.map(processTaskData);
+      } catch (error: any) {
+        taskToasts.fetchError(error.message || "Please try again later");
+        throw error;
+      }
     },
     enabled: !!TASK_REGISTRY_ID,
     staleTime: 30 * 1000, // 30 seconds

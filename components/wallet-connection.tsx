@@ -15,12 +15,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Wallet, LogOut, User, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { walletToasts } from "@/lib/toast-notifications";
 
 export function WalletConnection() {
   const account = useCurrentAccount();
   const { mutate: disconnect } = useDisconnectWallet();
   const [copied, setCopied] = useState(false);
+  const [previousAddress, setPreviousAddress] = useState<string | undefined>();
+
+  // Show toast when wallet connects
+  useEffect(() => {
+    if (account?.address && account.address !== previousAddress) {
+      walletToasts.connected(account.address);
+      setPreviousAddress(account.address);
+    } else if (!account?.address && previousAddress) {
+      walletToasts.disconnected();
+      setPreviousAddress(undefined);
+    }
+  }, [account?.address, previousAddress]);
 
   const copyAddress = async () => {
     if (account?.address) {
@@ -28,6 +41,10 @@ export function WalletConnection() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
   };
 
   const formatAddress = (address: string) => {
@@ -68,7 +85,7 @@ export function WalletConnection() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => disconnect()}
+          onClick={handleDisconnect}
           className="cursor-pointer text-red-600"
         >
           <LogOut className="mr-2 h-4 w-4" />

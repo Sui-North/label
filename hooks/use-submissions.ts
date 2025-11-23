@@ -4,6 +4,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useSuiClient, useCurrentAccount } from "@mysten/dapp-kit";
+import { submissionToasts, systemToasts } from "@/lib/toast-notifications";
 import { TASK_REGISTRY_ID, decodeVectorU8 } from "@/lib/contracts/songsim";
 
 export interface ProcessedSubmission {
@@ -53,6 +54,7 @@ export function useAllSubmissions() {
     queryKey: ["allSubmissions"],
     queryFn: async () => {
       if (!TASK_REGISTRY_ID) {
+        systemToasts.configError();
         return [];
       }
 

@@ -50,6 +50,7 @@ import {
   PACKAGE_ID,
   CLOCK_ID,
 } from "@/lib/contracts/songsim";
+import { profileToasts, uploadToasts, systemToasts } from "@/lib/toast-notifications";
 
 type UserType = 1 | 2 | 3;
 
@@ -172,6 +173,7 @@ export default function ProfilePage() {
     setError("");
     setSuccess("");
     setUploadProgress(0);
+    profileToasts.updateStart();
 
     try {
       // Validate inputs
@@ -198,6 +200,7 @@ export default function ProfilePage() {
 
       // Check contract configuration and profile
       if (!TASK_REGISTRY_ID || !profile.objectId) {
+        systemToasts.configError();
         setError("Contract not properly configured. Please contact support.");
         setIsSaving(false);
         return;
@@ -234,6 +237,7 @@ export default function ProfilePage() {
           onSuccess: (result) => {
             console.log("Profile updated successfully:", result);
             setUploadProgress(100);
+            profileToasts.updateSuccess();
 
             // Invalidate the profile cache to force a fresh fetch
             if (account) {
@@ -252,6 +256,7 @@ export default function ProfilePage() {
           },
           onError: (error) => {
             console.error("Transaction failed:", error);
+            profileToasts.updateError(error.message);
             setError(`Failed to update profile: ${error.message}`);
             setIsSaving(false);
             setUploadProgress(0);
@@ -260,6 +265,9 @@ export default function ProfilePage() {
       );
     } catch (error) {
       console.error("Error updating profile:", error);
+      profileToasts.updateError(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
       setError(
         error instanceof Error ? error.message : "Failed to update profile"
       );

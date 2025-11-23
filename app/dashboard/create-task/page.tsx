@@ -24,25 +24,23 @@ import {
   FileText,
   DollarSign,
   Calendar,
-  Users,
   AlertCircle,
   Image as ImageIcon,
   Type,
-  Mic,
-  Video,
 } from "lucide-react";
 import { toast } from "sonner";
+import { taskToasts, uploadToasts, walletToasts, profileToasts } from "@/lib/toast-notifications";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
 } from "@mysten/dapp-kit";
 import { useQueryClient } from "@tanstack/react-query";
 import { uploadToWalrus } from "@/lib/walrus";
-import { createTaskTransaction, PACKAGE_ID } from "@/lib/contracts/songsim";
+import { PACKAGE_ID } from "@/lib/contracts/songsim";
 import { TASK_REGISTRY_ID, PLATFORM_CONFIG_ID } from "@/lib/contracts/songsim";
 import { Transaction } from "@mysten/sui/transactions";
 import { useUserProfile } from "@/hooks/use-user-profile";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 type TaskType =
@@ -140,16 +138,12 @@ export default function CreateTaskPage() {
 
   const handleSubmit = async () => {
     if (!account?.address) {
-      toast.error("Wallet not connected", {
-        description: "Please connect your wallet to create a task",
-      });
+      walletToasts.connectionError("Please connect your wallet to create a task");
       return;
     }
 
     if (!profile?.objectId) {
-      toast.error("Profile not found", {
-        description: "Please create a profile first",
-      });
+      profileToasts.notFound();
       return;
     }
 
@@ -194,6 +188,7 @@ export default function CreateTaskPage() {
 
     setIsCreating(true);
     setUploadProgress(0);
+    const toastId = uploadToasts.uploadStart(taskData.datasetFiles[0].name);
 
     try {
       // Step 1: Upload dataset to Walrus
@@ -280,9 +275,7 @@ export default function CreateTaskPage() {
             console.log("Task created successfully:", result);
             setUploadProgress(100);
 
-            toast.success("Task created!", {
-              description: "Your task has been published on the blockchain",
-            });
+            taskToasts.createSuccess(result.digest.slice(0, 8));
 
             // Wait a bit for blockchain to finalize before invalidating cache
             await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -298,10 +291,9 @@ export default function CreateTaskPage() {
           },
           onError: (error) => {
             console.error("Transaction error:", error);
-            toast.error("Transaction failed", {
-              description:
-                error.message || "Failed to create task on blockchain",
-            });
+            taskToasts.createError(
+              error.message || "Failed to create task on blockchain"
+            );
             setIsCreating(false);
             setUploadProgress(0);
           },
@@ -309,10 +301,9 @@ export default function CreateTaskPage() {
       );
     } catch (error) {
       console.error("Error creating task:", error);
-      toast.error("Error", {
-        description:
-          error instanceof Error ? error.message : "Failed to create task",
-      });
+      taskToasts.createError(
+        error instanceof Error ? error.message : "Failed to create task"
+      );
       setIsCreating(false);
       setUploadProgress(0);
     }

@@ -4,6 +4,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSuiClient, useCurrentAccount } from "@mysten/dapp-kit";
+import { profileToasts } from "@/lib/toast-notifications";
 import {
   getUserProfile,
   hasUserProfile,

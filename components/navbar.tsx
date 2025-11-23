@@ -69,6 +69,7 @@ export function Navbar() {
               height={40}
               className="md:hidden"
               priority
+              unoptimized
             />
             {/* Horizontal logo for larger screens */}
             <Image
@@ -78,6 +79,7 @@ export function Navbar() {
               height={40}
               className="hidden md:block"
               priority
+              unoptimized
             />
           </Link>
 
@@ -117,6 +119,7 @@ export function Navbar() {
                       width={160}
                       height={40}
                       priority
+                      unoptimized
                     />
                   </Link>
                   <Button variant="ghost" asChild className="justify-start">

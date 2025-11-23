@@ -103,7 +103,7 @@ export default function TasksPage() {
   return (
     <>
       <Navbar />
-      <div className="container max-w-7xl py-8 space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-7xl py-8 space-y-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold mb-2">Browse Tasks</h1>

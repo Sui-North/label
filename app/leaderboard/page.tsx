@@ -453,9 +453,9 @@ export default function LeaderboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
-      <div className="container max-w-7xl py-12 space-y-12 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-7xl py-12 space-y-12 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center space-y-4 relative">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/20 blur-[100px] rounded-full -z-10 pointer-events-none" />
